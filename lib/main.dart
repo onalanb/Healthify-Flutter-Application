@@ -1,6 +1,7 @@
 // Baran Onalan
 // January 6th, 2024
 
+// Importing the necessary packages for the project.
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 
@@ -8,61 +9,71 @@ void main() {
   runApp(HealthHabitsApp());
 }
 
+// Applications main widget, helps set the theme and home page.
 class HealthHabitsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xFFFA7268), // Background color for app bar.
+        ),
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.green,  // Background color for the app.
+        ),
+      ),
       home: MyHomePage(),
     );
   }
 }
 
+// Main Home page widget containing the page view style.
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Healthify'),
+        title: Text('Healthify'), // App title.
       ),
-      body: RecorderPageView(), // Use the PageView to show recorders
+      body: RecorderPageView(), // This is the page view to show the different recorders.
     );
   }
 }
 
+// Page view widget displaying different recorders.
 class RecorderPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageView(
       children: [
-        EmotionRecorder(), // First page - Emotion Recorder
-        DietRecorder(), // Second page - Diet Recorder
-        WorkoutRecorder(), // Third page - Workout Recorder
+        EmotionRecorder(), // First page - Emotion Recorder.
+        DietRecorder(), // Second page - Diet Recorder.
+        WorkoutRecorder(), // Third page - Workout Recorder.
       ],
     );
   }
 }
 
-// Emotion Recorder
-// An emotion recorder. It lets the user choose from one of 24 (or more, if you prefer)
-// hard-coded emoji to express how they’re currently feeling. When they submit their choice,
-// log the emoji they selected. This widget should also show a list of emoji and datetimes.
-// In future assignments, we will use state management and persistence to populate the list,
-// but since we haven’t covered those topics yet you can hard-code your own mock data.
+// Emotion Recorder Widget
+// Allows user to choose from one of 30 hard coded emojis to express how they currently feel.
+// Keeps track of their choice and when the emoji was selected, logs their input.
 class EmotionRecorder extends StatefulWidget {
   @override
   _EmotionRecorderState createState() => _EmotionRecorderState();
 }
 
+// Stateful widget to record the emotions with emojis.
 class _EmotionRecorderState extends State<EmotionRecorder> {
   List<Map<String, dynamic>> emotions = [];
 
-  // Hard-coded list of 30 emojis for selection
+  // Hard-coded list of 30 emojis for the user's selection.
   final List<String> emojiList = [
     "😊", "😔", "😍", "😂", "😭", "😡", "😴", "🥳", "😎", "😇",
     "😐", "😬", "😒", "😳", "🤔", "😕", "😱", "😞", "😤", "🥺",
     "🤗", "😋", "😶", "🤢", "😵", "😈", "🙄", "😬", "😰", "🤩"
   ];
 
+  // Logs the selected emoji from user and creates a timestamp.
   void logEmotion(String selectedEmoji) {
     setState(() {
       emotions.insert(0, {
@@ -72,50 +83,52 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
     });
   }
 
+  // Widget UI for recording the user's emotions.
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'What emoji expresses how you feel?',
-          style: TextStyle(fontSize: 18),
+          'What emoji expresses how you feel?', // Title asking the user to select an emoji.
+          style: TextStyle(fontSize: 18),       // Style for the title
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 20), // Spacing between the title and emoji list.
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: 10,    // Horizontal space between emojis.
+          runSpacing: 10, // Vertical space between emojis.
           children: emojiList.map((emoji) {
+            // Mapping the list of emojis to gesture detector widgets.
             return GestureDetector(
-              onTap: () => logEmotion(emoji),
+              onTap: () => logEmotion(emoji), // Gesture detection to log selected emoji.
               child: Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Color(0xFFFA7268)), // Border color around each emoji.
+                  borderRadius: BorderRadius.circular(8),       // Rounded corners for the emojis.
                 ),
                 child: Text(
-                  emoji,
-                  style: TextStyle(fontSize: 30),
+                  emoji,                          // Display the emoji.
+                  style: TextStyle(fontSize: 30), // Size of emoji.
                 ),
               ),
             );
           }).toList(),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 20), // Spacing between emoji list and logged emotions.
         Text(
-          'Logged Emotions:',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          'Logged Emotions:',                                           // Title for logged emotions.
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for title.
         ),
-        SizedBox(height: 10),
+        SizedBox(height: 10), // Spacing between title and logged emotions list.
         Expanded(
           child: ListView.builder(
-            itemCount: emotions.length,
+            itemCount: emotions.length, // Total number of logged emotions.
             itemBuilder: (context, index) {
               return ListTile(
-                title: Text(emotions[index]['emoji']),
+                title: Text(emotions[index]['emoji']),  // Displays the logged emoji.
                 subtitle: Text(
-                  'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(emotions[index]['timestamp'])}',
+                  'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(emotions[index]['timestamp'])}',  // Displays the timestamp of the logged emotion.
                 ),
               );
             },
@@ -126,21 +139,23 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
   }
 }
 
-// Diet Recorder
-// A diet recorder. It lets the user type in what they ate and how much of it
-// they ate (two separate inputs). When they submit their choice, log the food
-// and quantity they entered.
+// Diet Recorder Widget
+// Allows user to type in what they ate and how much of it they had.
+// The amount of food can be input as calories, quantity, or grams.
+// Keeps track of how much they ate and when, logs their input.
 class DietRecorder extends StatefulWidget {
   @override
   _DietRecorderState createState() => _DietRecorderState();
 }
 
+// Stateful widget to record diet logs.
 class _DietRecorderState extends State<DietRecorder> {
   TextEditingController foodController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   List<Map<String, dynamic>> dietLogs = [];
   String selectedUnit = 'Calories'; // Default unit
 
+  // Log user's diet information with a timestamp.
   void logDiet() {
     String food = foodController.text;
     String quantity = quantityController.text;
@@ -161,69 +176,71 @@ class _DietRecorderState extends State<DietRecorder> {
     }
   }
 
+  // Widget UI for recording the user's diet information.
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),  // Padding around the widget.
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start, // Aligns children to the start (left side) of the column.
         children: [
           Text(
-            'What did you eat today?',
-            style: TextStyle(fontSize: 18),
+            'What did you eat today?',      // Title asking about the user's diet.
+            style: TextStyle(fontSize: 18), // Style for the title.
           ),
           TextField(
-            controller: foodController,
+            controller: foodController,   // Text field for input food.
             decoration: InputDecoration(
-              hintText: 'Enter food',
+              hintText: 'Enter food',     // Placeholder text for food input.
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20), // Spacing between food and quantity input.
           Row(
             children: [
               Expanded(
                 child: TextField(
-                  controller: quantityController,
-                  keyboardType: TextInputType.number,
+                  controller: quantityController,     // Text field for quantity input.
+                  keyboardType: TextInputType.number, // Keyboard for quantity input.
                   decoration: InputDecoration(
-                    hintText: 'Enter quantity',
+                    hintText: 'Enter quantity',       // Placeholder text for quantity input.
                   ),
                 ),
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 10),    // Spacing between quantity input and unit selection.
               DropdownButton<String>(
-                value: selectedUnit,
+                value: selectedUnit,  // Currently selected unit. (I.E. Calories, Grams, Items)
                 onChanged: (String? newValue) {
                   setState(() {
-                    selectedUnit = newValue!;
+                    selectedUnit = newValue!; // Updates the selected unit when changed.
                   });
                 },
                 items: ['Calories', 'Grams', 'Items'].map((String unit) {
                   return DropdownMenuItem<String>(
                     value: unit,
-                    child: Text(unit),
+                    child: Text(unit),  // Displays available units in the dropdown.
                   );
                 }).toList(),
               ),
             ],
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20),       // Spacing between unit selection and log diet button.
           ElevatedButton(
-            onPressed: logDiet,
-            child: Text('Log Diet'),
+            onPressed: logDiet,       // Function to log the diet entry.
+            child: Text('Log Diet'),  // Text for the button.
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20), // Spacing between log diet button and logged diet list.
           Text(
-            'Logged Diets:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            'Logged Diets:',    // Title for the list of logged diets.
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for the title.
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: dietLogs.length,
+              itemCount: dietLogs.length, // Total number of logged diets.
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('${dietLogs[index]['food']}'),
+                  title: Text('${dietLogs[index]['food']}'),  // Displays logged food.
                   subtitle: Text(
+                    // Displays quantity, unit, and timestamp of the logged diet entry.
                     'Quantity: ${dietLogs[index]['quantity']} ${dietLogs[index]['unit']} - Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
                   ),
                 );
@@ -236,31 +253,30 @@ class _DietRecorderState extends State<DietRecorder> {
   }
 }
 
-// Workout Recorder
-// A workout recorder. It lets the user choose an exercise from eight (or more, if you prefer)
-// hard-coded exercises and enter how much of that exercise they did. When they submit their choice,
-// log the exercise they selected and quantity they entered. This widget should also show a list
-// of exercises, quantities, and datetimes. In future assignments, we will use state management and
-// persistence to populate the list, but since we haven’t covered those topics yet you can hard-code
-// your own mock data.
+// Workout Recorder Widget
+// Allows the user to select a workout from 12 different options and for how long they did it.
+// Keeps track of their input and the time, logs their input.
 class WorkoutRecorder extends StatefulWidget {
   @override
   _WorkoutRecorderState createState() => _WorkoutRecorderState();
 }
 
+// Stateful widget to record workout logs.
 class _WorkoutRecorderState extends State<WorkoutRecorder> {
   TextEditingController durationController = TextEditingController();
   List<Map<String, dynamic>> workoutLogs = [];
 
-  // List of predefined exercises
+  // List of exercises the users get to pick from.
   final List<String> exercises = [
     'Dancing', 'Cycling', 'Running', 'Swimming',
     'Weightlifting', 'Yoga', 'Martial Arts', 'Rowing',
     'Climbing' , 'Jump Rope', 'Parkour', 'Stability Training'
   ];
 
-  String selectedExercise = 'Running'; // Default exercise
+  // The default exercise when the user opens the app.
+  String selectedExercise = 'Dancing';
 
+  // Logs the workout information with a timestamp.
   void logWorkout() {
     String duration = durationController.text;
 
@@ -278,60 +294,62 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
     }
   }
 
+  // Widget UI for recording the user's workout information.
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20), // Padding around the widget.
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start, // Aligns children to the start (left side) of the column.
         children: [
           Text(
-            'What was your workout today?',
-            style: TextStyle(fontSize: 18),
+            'What was your workout today?', // Title asking about the user's workout.
+            style: TextStyle(fontSize: 18), // Style for the title.
           ),
           DropdownButton<String>(
-            value: selectedExercise,
+            value: selectedExercise,  // Currently selected exercise.
             onChanged: (String? newValue) {
               setState(() {
-                selectedExercise = newValue!;
+                selectedExercise = newValue!; // Updates the selected exercise when changed.
               });
             },
             items: exercises.map((String exercise) {
               return DropdownMenuItem<String>(
                 value: exercise,
-                child: Text(exercise),
+                child: Text(exercise),  // Displays the available exercises in the dropdown.
               );
             }).toList(),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20),             // Spacing between the exercise selectio and duration input.
           Text(
-            'Duration (minutes):',
-            style: TextStyle(fontSize: 18),
+            'Duration (minutes):',          // Label for duration input.
+            style: TextStyle(fontSize: 18), // Style for the label.
           ),
           TextField(
-            controller: durationController,
-            keyboardType: TextInputType.number,
+            controller: durationController,     // Text field to input the workout duration.
+            keyboardType: TextInputType.number, // Keyboard for duration input.
             decoration: InputDecoration(
-              hintText: 'Enter duration',
+              hintText: 'Enter duration',       // Placeholder text for duration text field.
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20),         // Spacing between duration input and log workout button.
           ElevatedButton(
-            onPressed: logWorkout,
-            child: Text('Log Workout'),
+            onPressed: logWorkout,      // Function to log the workout entry.
+            child: Text('Log Workout'), // Text for the button.
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20), // Spacing between log workout button and logged workout list.
           Text(
-            'Logged Workouts:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            'Logged Workouts:', // Title for the list of logged workouts.
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for the title.
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: workoutLogs.length,
+              itemCount: workoutLogs.length,  // Total number of logged workouts.
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('${workoutLogs[index]['exercise']}'),
+                  title: Text('${workoutLogs[index]['exercise']}'), // Displays logged exercise.
                   subtitle: Text(
+                    // Displays duration and timestamp of the logged workout entry.
                     'Duration: ${workoutLogs[index]['duration']} mins - Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
                   ),
                 );
