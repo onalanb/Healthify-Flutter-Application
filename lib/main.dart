@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 
 void main() {
-  runApp(HealthHabitsApp());
+  runApp(HealthifyApp());
 }
 
 // Applications main widget, helps set the theme and home page.
-class HealthHabitsApp extends StatelessWidget {
+class HealthifyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,26 +22,26 @@ class HealthHabitsApp extends StatelessWidget {
           primarySwatch: Colors.green,  // Background color for the app.
         ),
       ),
-      home: MyHomePage(),
+      home: HomePage(),
     );
   }
 }
 
 // Main Home page widget containing the page view style.
-class MyHomePage extends StatelessWidget {
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Healthify'), // App title.
       ),
-      body: RecorderPageView(), // This is the page view to show the different recorders.
+      body: WidgetPageView(), // This is the page view to show the different recorders.
     );
   }
 }
 
 // Page view widget displaying different recorders.
-class RecorderPageView extends StatelessWidget {
+class WidgetPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageView(
