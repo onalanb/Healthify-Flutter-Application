@@ -16,7 +16,7 @@ class HealthifyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         appBarTheme: AppBarTheme(
-          backgroundColor: Color(0xFFFA7268), // Background color for app bar.
+          backgroundColor: Color(0xDED04646), // Background color for app bar.
         ),
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.green,  // Background color for the app.
@@ -241,7 +241,7 @@ class _DietRecorderState extends State<DietRecorder> {
                   title: Text('${dietLogs[index]['food']}'),  // Displays logged food.
                   subtitle: Text(
                     // Displays quantity, unit, and timestamp of the logged diet entry.
-                    'Quantity: ${dietLogs[index]['quantity']} ${dietLogs[index]['unit']} - Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
+                    'Quantity: ${dietLogs[index]['quantity']} ${dietLogs[index]['unit']} \nLogged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
                   ),
                 );
               },
@@ -350,7 +350,7 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
                   title: Text('${workoutLogs[index]['exercise']}'), // Displays logged exercise.
                   subtitle: Text(
                     // Displays duration and timestamp of the logged workout entry.
-                    'Duration: ${workoutLogs[index]['duration']} mins - Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
+                    'Duration: ${workoutLogs[index]['duration']} mins \nLogged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
                   ),
                 );
               },
