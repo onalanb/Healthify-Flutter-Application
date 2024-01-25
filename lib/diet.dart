@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
+import 'recording.dart';
 
 // Diet Recorder Widget
 // Allows user to type in what they ate and how much of it they had.
@@ -8,7 +10,7 @@ import 'package:intl/intl.dart'; // For date/time formatting
 class DietRecorder extends StatefulWidget {
   final List<Map<String, dynamic>> dietLogs;
 
-  DietRecorder({required this.dietLogs, Key? key}) : super(key: key);
+  const DietRecorder({required this.dietLogs, Key? key}) : super(key: key);
 
   @override
   _DietRecorderState createState() => _DietRecorderState();
@@ -19,7 +21,7 @@ class _DietRecorderState extends State<DietRecorder> {
   TextEditingController foodController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   late List<Map<String, dynamic>> dietLogs;
-  Set<String> foodDropdown = Set();
+  Set<String> foodDropdown = {};
 
   String selectedUnit = 'Calories'; // Default unit
   String? selectedEntry; // Selected entry from the dropdown list
@@ -37,6 +39,12 @@ class _DietRecorderState extends State<DietRecorder> {
 
   // Log user's diet information with a timestamp.
   void logDiet() {
+    // Get an instance of RecordingProvider
+    final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
+
+    // Record the emotion using the provider
+    recordingProvider.record('Diet');
+
     String food = foodController.text;
     String quantity = quantityController.text;
 
@@ -67,11 +75,11 @@ class _DietRecorderState extends State<DietRecorder> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20),  // Padding around the widget.
+      padding: const EdgeInsets.all(20),  // Padding around the widget.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // Aligns children to the start (left side) of the column.
         children: [
-          Text(
+          const Text(
             'What did you eat today?',      // Title asking about the user's diet.
             style: TextStyle(fontSize: 18), // Style for the title.
           ),
@@ -106,19 +114,19 @@ class _DietRecorderState extends State<DietRecorder> {
             ],
           ),
 
-          SizedBox(height: 20), // Spacing between food and quantity input.
+          const SizedBox(height: 20), // Spacing between food and quantity input.
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: quantityController,     // Text field for quantity input.
                   keyboardType: TextInputType.number, // Keyboard for quantity input.
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter quantity',       // Placeholder text for quantity input.
                   ),
                 ),
               ),
-              SizedBox(width: 10),    // Spacing between quantity input and unit selection.
+              const SizedBox(width: 10),    // Spacing between quantity input and unit selection.
               DropdownButton<String>(
                 value: selectedUnit,  // Currently selected unit. (I.E. Calories, Grams, Items)
                 onChanged: (String? newValue) {
@@ -135,13 +143,13 @@ class _DietRecorderState extends State<DietRecorder> {
               ),
             ],
           ),
-          SizedBox(height: 20),       // Spacing between unit selection and log diet button.
+          const SizedBox(height: 20),       // Spacing between unit selection and log diet button.
           ElevatedButton(
             onPressed: logDiet,       // Function to log the diet entry.
-            child: Text('Log Diet'),  // Text for the button.
+            child: const Text('Log Diet'),  // Text for the button.
           ),
-          SizedBox(height: 20), // Spacing between log diet button and logged diet list.
-          Text(
+          const SizedBox(height: 20), // Spacing between log diet button and logged diet list.
+          const Text(
             'Logged Diets:',    // Title for the list of logged diets.
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for the title.
           ),

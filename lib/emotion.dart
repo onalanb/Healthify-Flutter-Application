@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
+import 'recording.dart';
 
 // Emotion Recorder Widget
 // Allows user to choose from one of 30 hard coded emojis to express how they currently feel.
@@ -7,7 +9,7 @@ import 'package:intl/intl.dart'; // For date/time formatting
 class EmotionRecorder extends StatefulWidget {
   final List<Map<String, dynamic>> emotionLogs;
 
-  EmotionRecorder({required this.emotionLogs, Key? key}) : super(key: key);
+  const EmotionRecorder({required this.emotionLogs, Key? key}) : super(key: key);
 
   @override
   _EmotionRecorderState createState() => _EmotionRecorderState();
@@ -17,11 +19,12 @@ class EmotionRecorder extends StatefulWidget {
 class _EmotionRecorderState extends State<EmotionRecorder> {
   late List<Map<String, dynamic>> emotionLogs;
 
-  // Hard-coded list of 30 emojis for the user's selection.
+  // Hard-coded list of 35 emojis for the user's selection.
   final List<String> emojiList = [
     "😊", "😔", "😍", "😂", "😭", "😡", "😴", "🥳", "😎", "😇",
     "😐", "😬", "😒", "😳", "🤔", "😕", "😱", "😞", "😤", "🥺",
-    "🤗", "😋", "😶", "🤢", "😵", "😈", "🙄", "😬", "😰", "🤩"
+    "🤗", "😋", "😶", "🤢", "😵", "😈", "🙄", "😬", "😰", "🤩",
+    "😌", "😅", "😪", "😓", "😖"
   ];
 
   @override
@@ -32,6 +35,13 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
 
   // Logs the selected emoji from user and creates a timestamp.
   void logEmotion(String selectedEmoji) {
+
+    // Get an instance of RecordingProvider
+    final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
+
+    // Record the emotion using the provider
+    recordingProvider.record('Emotion');
+
     setState(() {
       emotionLogs.insert(0, {
         'emoji': selectedEmoji,
@@ -46,11 +56,11 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
+        const Text(
           'What emoji expresses how you feel?', // Title asking the user to select an emoji.
           style: TextStyle(fontSize: 18),       // Style for the title
         ),
-        SizedBox(height: 20), // Spacing between the title and emoji list.
+        const SizedBox(height: 20), // Spacing between the title and emoji list.
         Wrap(
           spacing: 10,    // Horizontal space between emojis.
           runSpacing: 10, // Vertical space between emojis.
@@ -59,25 +69,25 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
             return GestureDetector(
               onTap: () => logEmotion(emoji), // Gesture detection to log selected emoji.
               child: Container(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   border: Border.all(color: Color(0xFFFA7268)), // Border color around each emoji.
                   borderRadius: BorderRadius.circular(8),       // Rounded corners for the emojis.
                 ),
                 child: Text(
                   emoji,                          // Display the emoji.
-                  style: TextStyle(fontSize: 30), // Size of emoji.
+                  style: const TextStyle(fontSize: 20), // Size of emoji.
                 ),
               ),
             );
           }).toList(),
         ),
-        SizedBox(height: 20), // Spacing between emoji list and logged emotions.
-        Text(
+        const SizedBox(height: 20), // Spacing between emoji list and logged emotions.
+        const Text(
           'Logged Emotions:',                                           // Title for logged emotions.
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for title.
         ),
-        SizedBox(height: 10), // Spacing between title and logged emotions list.
+        const SizedBox(height: 10), // Spacing between title and logged emotions list.
         Expanded(
           child: ListView.builder(
             itemCount: emotionLogs.length, // Total number of logged emotions.

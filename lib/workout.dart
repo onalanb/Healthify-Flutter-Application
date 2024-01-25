@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
+import 'recording.dart';
 
 // Workout Recorder Widget
 // Allows the user to select a workout from 12 different options and for how long they did it.
@@ -7,7 +9,7 @@ import 'package:intl/intl.dart'; // For date/time formatting
 class WorkoutRecorder extends StatefulWidget {
   final List<Map<String, dynamic>> workoutLogs;
 
-  WorkoutRecorder({required this.workoutLogs, Key? key}) : super(key: key);
+  const WorkoutRecorder({required this.workoutLogs, Key? key}) : super(key: key);
 
   @override
   _WorkoutRecorderState createState() => _WorkoutRecorderState();
@@ -36,6 +38,12 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
 
   // Logs the workout information with a timestamp.
   void logWorkout() {
+    // Get an instance of RecordingProvider
+    final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
+
+    // Record the emotion using the provider
+    recordingProvider.record('Workout');
+
     String duration = durationController.text;
 
     if (duration.isNotEmpty) {
@@ -60,7 +68,7 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // Aligns children to the start (left side) of the column.
         children: [
-          Text(
+          const Text(
             'What was your workout today?', // Title asking about the user's workout.
             style: TextStyle(fontSize: 18), // Style for the title.
           ),
@@ -78,25 +86,25 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
               );
             }).toList(),
           ),
-          SizedBox(height: 20),             // Spacing between the exercise selectio and duration input.
-          Text(
+          const SizedBox(height: 20),             // Spacing between the exercise selectio and duration input.
+          const Text(
             'Duration (minutes):',          // Label for duration input.
             style: TextStyle(fontSize: 18), // Style for the label.
           ),
           TextField(
             controller: durationController,     // Text field to input the workout duration.
             keyboardType: TextInputType.number, // Keyboard for duration input.
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Enter duration',       // Placeholder text for duration text field.
             ),
           ),
-          SizedBox(height: 20),         // Spacing between duration input and log workout button.
+          const SizedBox(height: 20),         // Spacing between duration input and log workout button.
           ElevatedButton(
             onPressed: logWorkout,      // Function to log the workout entry.
-            child: Text('Log Workout'), // Text for the button.
+            child: const Text('Log Workout'), // Text for the button.
           ),
-          SizedBox(height: 20), // Spacing between log workout button and logged workout list.
-          Text(
+          const SizedBox(height: 20), // Spacing between log workout button and logged workout list.
+          const Text(
             'Logged Workouts:', // Title for the list of logged workouts.
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for the title.
           ),
