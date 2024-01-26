@@ -9,7 +9,7 @@ import 'recording.dart';
 class WorkoutRecorder extends StatefulWidget {
   final List<Map<String, dynamic>> workoutLogs;
 
-  const WorkoutRecorder({required this.workoutLogs, Key? key}) : super(key: key);
+  WorkoutRecorder({required this.workoutLogs, Key? key}) : super(key: key);
 
   @override
   _WorkoutRecorderState createState() => _WorkoutRecorderState();
@@ -113,10 +113,10 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
               itemCount: workoutLogs.length,  // Total number of logged workouts.
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('${workoutLogs[index]['exercise']}'), // Displays logged exercise.
+                  title: Text('${workoutLogs[index]['exercise']} (${workoutLogs[index]['duration']} mins)'), // Displays logged exercise.
                   subtitle: Text(
                     // Displays duration and timestamp of the logged workout entry.
-                    'Duration: ${workoutLogs[index]['duration']} mins \nLogged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
+                    'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
                   ),
                 );
               },

@@ -10,7 +10,7 @@ import 'recording.dart';
 class DietRecorder extends StatefulWidget {
   final List<Map<String, dynamic>> dietLogs;
 
-  const DietRecorder({required this.dietLogs, Key? key}) : super(key: key);
+  DietRecorder({required this.dietLogs, Key? key}) : super(key: key);
 
   @override
   _DietRecorderState createState() => _DietRecorderState();
@@ -158,10 +158,10 @@ class _DietRecorderState extends State<DietRecorder> {
               itemCount: dietLogs.length, // Total number of logged diets.
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('${dietLogs[index]['food']}'),  // Displays logged food.
+                  title: Text('${dietLogs[index]['food']} (${dietLogs[index]['quantity']} ${dietLogs[index]['unit']})'),  // Displays logged food.
                   subtitle: Text(
                     // Displays quantity, unit, and timestamp of the logged diet entry.
-                    'Quantity: ${dietLogs[index]['quantity']} ${dietLogs[index]['unit']} \nLogged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
+                    'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
                   ),
                 );
               },
