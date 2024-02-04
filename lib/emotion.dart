@@ -35,7 +35,7 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
   }
 
   // Logs the selected emoji from user and creates a timestamp.
-  void logEmotion(String selectedEmoji) async {
+  void logEmotion(String selectedEmoji) {
 
     // Get an instance of RecordingProvider
     final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);

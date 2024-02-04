@@ -17,9 +17,11 @@ void main() async {
   Hive.init(appDocumentDir.path);
 
   // Delete the hive boxes to start fresh
-  //await Hive.deleteBoxFromDisk('EmotionBox');
+  // await Hive.deleteBoxFromDisk('EmotionBox');
 
   await Hive.openBox<Map<dynamic, dynamic>>('EmotionBox');
+  await Hive.openBox<Map<dynamic, dynamic>>('DietBox');
+  await Hive.openBox<Map<dynamic, dynamic>>('WorkoutBox');
 
   runApp(
     MultiProvider(
@@ -139,8 +141,17 @@ class WidgetPageView extends StatelessWidget {
     List<Map<dynamic, dynamic>> emotionLogs = allEmotions.reversed.toList();
     print('emotionLogs: $emotionLogs');
 
-    List<Map<String, dynamic>> workoutLogs = [];
-    List<Map<String, dynamic>> dietLogs = [];
+    var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
+    List<Map<dynamic, dynamic>> allDiets = dietBox.values.toList();
+    print('allDiets: $allDiets');
+    List<Map<dynamic, dynamic>> dietLogs = allDiets.reversed.toList();
+    print('dietLogs: $dietLogs');
+
+    var workoutBox = Hive.box<Map<dynamic, dynamic>>('WorkoutBox');
+    List<Map<dynamic, dynamic>> allWorkouts = workoutBox.values.toList();
+    print('allWorkouts: $allWorkouts');
+    List<Map<dynamic, dynamic>> workoutLogs = allWorkouts.reversed.toList();
+    print('workoutLogs: $workoutLogs');
 
     return PageView(
       children: [

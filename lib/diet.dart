@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
+import 'package:hive/hive.dart';
 import 'recording.dart';
 
 // Diet Recorder Widget
@@ -8,7 +9,7 @@ import 'recording.dart';
 // The amount of food can be input as calories, quantity, or grams.
 // Keeps track of how much they ate and when, logs their input.
 class DietRecorder extends StatefulWidget {
-  final List<Map<String, dynamic>> dietLogs;
+  final List<Map<dynamic, dynamic>> dietLogs;
 
   DietRecorder({required this.dietLogs, Key? key}) : super(key: key);
 
@@ -20,7 +21,7 @@ class DietRecorder extends StatefulWidget {
 class _DietRecorderState extends State<DietRecorder> {
   TextEditingController foodController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
-  late List<Map<String, dynamic>> dietLogs;
+  late List<Map<dynamic, dynamic>> dietLogs;
   Set<String> foodDropdown = {};
 
   String selectedUnit = 'Calories'; // Default unit
@@ -43,20 +44,27 @@ class _DietRecorderState extends State<DietRecorder> {
     // Get an instance of RecordingProvider
     final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
 
-    // Record the emotion using the provider
+    // Record the diet using the provider
     recordingProvider.record('Diet');
 
     String food = foodController.text;
     String quantity = quantityController.text;
 
+    var now = DateTime.now();
+    var loggedDiet = {
+      'food': food.isNotEmpty ? food : selectedEntry,
+      'quantity': quantity,
+      'unit': selectedUnit,
+      'timestamp': now,
+    };
+
+    // Add the diet to hive database
+    var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
+    dietBox.put(now.millisecondsSinceEpoch.toString(), loggedDiet);
+
     if ((food.isNotEmpty || dietLogs.isNotEmpty) && quantity.isNotEmpty) {
       setState(() {
-        dietLogs.insert(0, {
-          'food': food.isNotEmpty ? food : selectedEntry,
-          'quantity': quantity,
-          'unit': selectedUnit,
-          'timestamp': DateTime.now(),
-        });
+        dietLogs.insert(0, loggedDiet);
 
         if (food.isNotEmpty) {
           foodDropdown.add(food);
@@ -73,7 +81,7 @@ class _DietRecorderState extends State<DietRecorder> {
   }
 
   void updateDiet(int index) {
-    Map<String, dynamic> log = dietLogs.elementAt(index);
+    Map<dynamic, dynamic> log = dietLogs.elementAt(index);
     setState(() {
       foodController.text = log['food'];
       quantityController.text = log['quantity'];
@@ -174,11 +182,32 @@ class _DietRecorderState extends State<DietRecorder> {
                     // Displays quantity, unit, and timestamp of the logged diet entry.
                     'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
                   ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () {
-                      updateDiet(index);
-                    },
+                  trailing: Row (
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton (
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          updateDiet(index);
+                        },
+                      ),
+                      IconButton (
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          // Delete the diet from hive database
+                          // Add the diet to hive database
+                          var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
+                          var dietKey = (dietLogs[index]['timestamp'] as DateTime).millisecondsSinceEpoch.toString();
+                          dietBox.delete(dietKey);
+                          print('Deleting key $dietKey');
+                          print('Remaining keys ${dietBox.keys}');
+                          print('Remaining values ${dietBox.values}');
+                          setState(() {
+                            dietLogs.removeAt(index);
+                          });
+                        }
+                      ),
+                    ],
                   ),
                 );
               },

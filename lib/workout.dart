@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
+import 'package:hive/hive.dart';
 import 'recording.dart';
 
 // Workout Recorder Widget
 // Allows the user to select a workout from 12 different options and for how long they did it.
 // Keeps track of their input and the time, logs their input.
 class WorkoutRecorder extends StatefulWidget {
-  final List<Map<String, dynamic>> workoutLogs;
+  final List<Map<dynamic, dynamic>> workoutLogs;
 
   WorkoutRecorder({required this.workoutLogs, Key? key}) : super(key: key);
 
@@ -18,7 +19,7 @@ class WorkoutRecorder extends StatefulWidget {
 // Stateful widget to record workout logs.
 class _WorkoutRecorderState extends State<WorkoutRecorder> {
   TextEditingController durationController = TextEditingController();
-  late List<Map<String, dynamic>> workoutLogs;
+  late List<Map<dynamic, dynamic>> workoutLogs;
 
   // List of exercises the users get to pick from.
   final List<String> exercises = [
@@ -41,18 +42,25 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
     // Get an instance of RecordingProvider
     final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
 
-    // Record the emotion using the provider
+    // Record the workout using the provider
     recordingProvider.record('Workout');
 
     String duration = durationController.text;
 
+    var now = DateTime.now();
+    var loggedWorkout = {
+      'exercise': selectedExercise,
+      'duration': duration,
+      'timestamp': now,
+    };
+
+    // Add the workout to hive database
+    var workoutBox = Hive.box<Map<dynamic, dynamic>>('WorkoutBox');
+    workoutBox.put(now.millisecondsSinceEpoch.toString(), loggedWorkout);
+
     if (duration.isNotEmpty) {
       setState(() {
-        workoutLogs.insert(0, {
-          'exercise': selectedExercise,
-          'duration': duration,
-          'timestamp': DateTime.now(),
-        });
+        workoutLogs.insert(0, loggedWorkout);
       });
 
       // Clear the text field after logging
@@ -117,6 +125,33 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
                   subtitle: Text(
                     // Displays duration and timestamp of the logged workout entry.
                     'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          // Implement your edit logic here
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          // Delete the workout from hive database
+                          // Add the workout to hive database
+                          var workoutBox = Hive.box<Map<dynamic, dynamic>>('WorkoutBox');
+                          var workoutKey = (workoutLogs[index]['timestamp'] as DateTime).millisecondsSinceEpoch.toString();
+                          workoutBox.delete(workoutKey);
+                          print('Deleting key $workoutKey');
+                          print('Remaining keys ${workoutBox.keys}');
+                          print('Remaining values ${workoutBox.values}');
+                          setState(() {
+                            workoutLogs.removeAt(index);
+                          });
+                        },
+                      ),
+                    ],
                   ),
                 );
               },
