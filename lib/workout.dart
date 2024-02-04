@@ -42,9 +42,6 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
     // Get an instance of RecordingProvider
     final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
 
-    // Record the workout using the provider
-    recordingProvider.record('Workout');
-
     String duration = durationController.text;
 
     var now = DateTime.now();
@@ -54,11 +51,15 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
       'timestamp': now,
     };
 
-    // Add the workout to hive database
-    var workoutBox = Hive.box<Map<dynamic, dynamic>>('WorkoutBox');
-    workoutBox.put(now.millisecondsSinceEpoch.toString(), loggedWorkout);
-
     if (duration.isNotEmpty) {
+      // Record the workout using the provider
+      recordingProvider.record('Workout');
+
+      // Add the workout to hive database
+      var workoutBox = Hive.box<Map<dynamic, dynamic>>('WorkoutBox');
+      workoutBox.put(now.millisecondsSinceEpoch.toString(), loggedWorkout);
+
+      // Allows us to set the state for the local change so that it is re-rendered
       setState(() {
         workoutLogs.insert(0, loggedWorkout);
       });
@@ -129,12 +130,13 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          // Implement your edit logic here
-                        },
-                      ),
+                      // For future potential implementation of edit button.
+                      // IconButton(
+                      //   icon: Icon(Icons.edit),
+                      //   onPressed: () {
+                      //     // Implement edit logic here
+                      //   },
+                      // ),
                       IconButton(
                         icon: Icon(Icons.delete),
                         onPressed: () {

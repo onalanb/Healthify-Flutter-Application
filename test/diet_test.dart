@@ -19,7 +19,7 @@ void main() {
                 ChangeNotifierProvider.value(value: recordingProvider),
               ],
               child: Scaffold(
-                body: DietRecorder(dietLogs: []),
+                body: DietRecorder(dietLogs: [], foodDropdown: {},),
               ),
             ),
           ),

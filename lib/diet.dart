@@ -10,8 +10,9 @@ import 'recording.dart';
 // Keeps track of how much they ate and when, logs their input.
 class DietRecorder extends StatefulWidget {
   final List<Map<dynamic, dynamic>> dietLogs;
+  final Set<String> foodDropdown;
 
-  DietRecorder({required this.dietLogs, Key? key}) : super(key: key);
+  DietRecorder({required this.dietLogs, required this.foodDropdown, Key? key}) : super(key: key);
 
   @override
   _DietRecorderState createState() => _DietRecorderState();
@@ -22,16 +23,17 @@ class _DietRecorderState extends State<DietRecorder> {
   TextEditingController foodController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   late List<Map<dynamic, dynamic>> dietLogs;
-  Set<String> foodDropdown = {};
+  late Set<String> foodDropdown;
 
   String selectedUnit = 'Calories'; // Default unit
   String? selectedEntry; // Selected entry from the dropdown list
-  int saveIndex = -1;
+  int saveIndex = -1; // Remember index for value to be updated
 
   @override
   void initState() {
     super.initState();
     dietLogs = widget.dietLogs;
+    foodDropdown = widget.foodDropdown;
 
     // Set the default selected entry to the first entry in dietLogs (if available)
     if (dietLogs.isNotEmpty) {
@@ -44,9 +46,6 @@ class _DietRecorderState extends State<DietRecorder> {
     // Get an instance of RecordingProvider
     final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
 
-    // Record the diet using the provider
-    recordingProvider.record('Diet');
-
     String food = foodController.text;
     String quantity = quantityController.text;
 
@@ -58,12 +57,22 @@ class _DietRecorderState extends State<DietRecorder> {
       'timestamp': now,
     };
 
-    // Add the diet to hive database
-    var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
-    dietBox.put(now.millisecondsSinceEpoch.toString(), loggedDiet);
-
     if ((food.isNotEmpty || dietLogs.isNotEmpty) && quantity.isNotEmpty) {
+      // Record the diet using the provider
+      recordingProvider.record('Diet');
+
+      // Add the diet to hive database
+      var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
+      dietBox.put(now.millisecondsSinceEpoch.toString(), loggedDiet);
+
+      if (food.isNotEmpty && !foodDropdown.contains(food)) {
+        var foodDropdownBox = Hive.box<String>('FoodDropdownBox');
+        foodDropdownBox.put(now.millisecondsSinceEpoch.toString(), food); // Key is time, query is here in case I want to delete later.
+      }
+
+      // Allows us to set the state for the local change so that it is re-rendered
       setState(() {
+        saveIndex = -1;
         dietLogs.insert(0, loggedDiet);
 
         if (food.isNotEmpty) {
@@ -87,6 +96,28 @@ class _DietRecorderState extends State<DietRecorder> {
       quantityController.text = log['quantity'];
       selectedUnit = log['unit'];
       saveIndex = index;
+    });
+  }
+
+  void updateDietLog() {
+    Map<dynamic, dynamic> log = dietLogs.elementAt(saveIndex);
+    String food = foodController.text;
+    String quantity = quantityController.text;
+
+    var saveDiet = {
+      'food': food.isNotEmpty ? food : selectedEntry,
+      'quantity': quantity,
+      'unit': selectedUnit,
+      'timestamp': log['timestamp'],
+    };
+
+    // Add the diet to hive database
+    var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
+    dietBox.put(log['timestamp'].millisecondsSinceEpoch.toString(), saveDiet);
+
+    setState(() {
+      dietLogs[saveIndex] = saveDiet;
+      saveIndex = -1;
     });
   }
 
@@ -163,9 +194,20 @@ class _DietRecorderState extends State<DietRecorder> {
             ],
           ),
           const SizedBox(height: 20),       // Spacing between unit selection and log diet button.
-          ElevatedButton(
-            onPressed: logDiet,       // Function to log the diet entry.
-            child: saveIndex < 0 ? const Text('Log Diet') : const Text("Save"),  // Text for the button.
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: logDiet,       // Function to log the diet entry.
+                child: const Text('Log Diet'),
+              ),
+              if (saveIndex >= 0) ...[
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: updateDietLog,
+                  child: Text('Update'),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 20), // Spacing between log diet button and logged diet list.
           const Text(

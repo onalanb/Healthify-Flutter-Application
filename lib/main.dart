@@ -22,6 +22,7 @@ void main() async {
   await Hive.openBox<Map<dynamic, dynamic>>('EmotionBox');
   await Hive.openBox<Map<dynamic, dynamic>>('DietBox');
   await Hive.openBox<Map<dynamic, dynamic>>('WorkoutBox');
+  await Hive.openBox<String>('FoodDropdownBox');
 
   runApp(
     MultiProvider(
@@ -147,6 +148,10 @@ class WidgetPageView extends StatelessWidget {
     List<Map<dynamic, dynamic>> dietLogs = allDiets.reversed.toList();
     print('dietLogs: $dietLogs');
 
+    var foodDropdownBox = Hive.box<String>('FoodDropdownBox');
+    Set<String> foodDropdown = foodDropdownBox.values.toSet();
+    print('foodDropdown: $foodDropdown');
+
     var workoutBox = Hive.box<Map<dynamic, dynamic>>('WorkoutBox');
     List<Map<dynamic, dynamic>> allWorkouts = workoutBox.values.toList();
     print('allWorkouts: $allWorkouts');
@@ -156,7 +161,7 @@ class WidgetPageView extends StatelessWidget {
     return PageView(
       children: [
         EmotionRecorder(emotionLogs: emotionLogs, key: emotionRecorderKey), // First page - Emotion Recorder.
-        DietRecorder(dietLogs: dietLogs, key: dietRecorderKey), // Second page - Diet Recorder.
+        DietRecorder(dietLogs: dietLogs, foodDropdown: foodDropdown, key: dietRecorderKey), // Second page - Diet Recorder.
         WorkoutRecorder(workoutLogs: workoutLogs, key: workoutRecorderKey), // Third page - Workout Recorder.
       ],
     );
