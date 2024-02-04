@@ -25,6 +25,7 @@ class _DietRecorderState extends State<DietRecorder> {
 
   String selectedUnit = 'Calories'; // Default unit
   String? selectedEntry; // Selected entry from the dropdown list
+  int saveIndex = -1;
 
   @override
   void initState() {
@@ -69,6 +70,16 @@ class _DietRecorderState extends State<DietRecorder> {
         quantityController.clear();
       });
     }
+  }
+
+  void updateDiet(int index) {
+    Map<String, dynamic> log = dietLogs.elementAt(index);
+    setState(() {
+      foodController.text = log['food'];
+      quantityController.text = log['quantity'];
+      selectedUnit = log['unit'];
+      saveIndex = index;
+    });
   }
 
   // Widget UI for recording the user's diet information.
@@ -146,7 +157,7 @@ class _DietRecorderState extends State<DietRecorder> {
           const SizedBox(height: 20),       // Spacing between unit selection and log diet button.
           ElevatedButton(
             onPressed: logDiet,       // Function to log the diet entry.
-            child: const Text('Log Diet'),  // Text for the button.
+            child: saveIndex < 0 ? const Text('Log Diet') : const Text("Save"),  // Text for the button.
           ),
           const SizedBox(height: 20), // Spacing between log diet button and logged diet list.
           const Text(
@@ -162,6 +173,12 @@ class _DietRecorderState extends State<DietRecorder> {
                   subtitle: Text(
                     // Displays quantity, unit, and timestamp of the logged diet entry.
                     'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      updateDiet(index);
+                    },
                   ),
                 );
               },

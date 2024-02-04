@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
+import 'package:hive/hive.dart';
 import 'recording.dart';
 
 // Emotion Recorder Widget
 // Allows user to choose from one of 30 hard coded emojis to express how they currently feel.
 // Keeps track of their choice and when the emoji was selected, logs their input.
 class EmotionRecorder extends StatefulWidget {
-  final List<Map<String, dynamic>> emotionLogs;
+  final List<Map<dynamic, dynamic>> emotionLogs;
 
   const EmotionRecorder({required this.emotionLogs, Key? key}) : super(key: key);
 
@@ -17,7 +18,7 @@ class EmotionRecorder extends StatefulWidget {
 
 // Stateful widget to record the emotions with emojis.
 class _EmotionRecorderState extends State<EmotionRecorder> {
-  late List<Map<String, dynamic>> emotionLogs;
+  late List<Map<dynamic, dynamic>> emotionLogs;
 
   // Hard-coded list of 35 emojis for the user's selection.
   final List<String> emojiList = [
@@ -34,19 +35,27 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
   }
 
   // Logs the selected emoji from user and creates a timestamp.
-  void logEmotion(String selectedEmoji) {
+  void logEmotion(String selectedEmoji) async {
 
     // Get an instance of RecordingProvider
     final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
 
+    var now = DateTime.now();
+    var loggedEmotion = {
+      'emoji': selectedEmoji,
+      'timestamp': now,
+    };
+
     // Record the emotion using the provider
     recordingProvider.record('Emotion');
 
+    // Add the emotion to hive database
+    var emotionBox = Hive.box<Map<dynamic, dynamic>>('EmotionBox');
+    emotionBox.put(now.millisecondsSinceEpoch.toString(), loggedEmotion);
+
+    // Add the emotion to our local state that shows on the widget
     setState(() {
-      emotionLogs.insert(0, {
-        'emoji': selectedEmoji,
-        'timestamp': DateTime.now(),
-      });
+      emotionLogs.insert(0, loggedEmotion);
     });
   }
 
@@ -96,6 +105,24 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
                 title: Text(emotionLogs[index]['emoji']),  // Displays the logged emoji.
                 subtitle: Text(
                   'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(emotionLogs[index]['timestamp'])}',  // Displays the timestamp of the logged emotion.
+                ),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    // Delete the emotion from hive database
+                    // Add the emotion to hive database
+                    var emotionBox = Hive.box<Map<dynamic, dynamic>>('EmotionBox');
+                    var emotionKey = (emotionLogs[index]['timestamp'] as DateTime).millisecondsSinceEpoch.toString();
+                    emotionBox.delete(emotionKey);
+                    print('Deleting key $emotionKey');
+                    print('Remaining keys ${emotionBox.keys}');
+                    print('Remaining values ${emotionBox.values}');
+
+                    // Delete the emotion from the local list:
+                    setState(() {
+                      emotionLogs.removeAt(index);
+                    });
+                  },
                 ),
               );
             },

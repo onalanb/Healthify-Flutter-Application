@@ -1,16 +1,26 @@
 // Baran Onalan
 // January 6th, 2024
 
-// Importing the necessary packages for the project.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'emotion.dart';
 import 'diet.dart';
 import 'workout.dart';
 import 'recording.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDocumentDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDir.path);
+
+  // Delete the hive boxes to start fresh
+  //await Hive.deleteBoxFromDisk('EmotionBox');
+
+  await Hive.openBox<Map<dynamic, dynamic>>('EmotionBox');
+
   runApp(
     MultiProvider(
       providers: [
@@ -31,7 +41,7 @@ class HealthifyApp extends StatelessWidget {
           backgroundColor: Color(0xDED04646), // Background color for app bar.
         ),
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.green,  // Background color for the app.
+          primarySwatch: Colors.deepOrange,  // Background color for the app.
         ),
       ),
       home: Scaffold(
@@ -117,16 +127,21 @@ class _HomePageState extends State<HomePage> {
 
 // Page view widget displaying different recorders.
 class WidgetPageView extends StatelessWidget {
-  List<Map<String, dynamic>> workoutLogs = [];
-  List<Map<String, dynamic>> dietLogs = [];
-  List<Map<String, dynamic>> emotionLogs = [];
-
   final Key emotionRecorderKey = UniqueKey();
   final Key dietRecorderKey = UniqueKey();
   final Key workoutRecorderKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
+    var emotionBox = Hive.box<Map<dynamic, dynamic>>('EmotionBox');
+    List<Map<dynamic, dynamic>> allEmotions = emotionBox.values.toList();
+    print('allEmotions: $allEmotions');
+    List<Map<dynamic, dynamic>> emotionLogs = allEmotions.reversed.toList();
+    print('emotionLogs: $emotionLogs');
+
+    List<Map<String, dynamic>> workoutLogs = [];
+    List<Map<String, dynamic>> dietLogs = [];
+
     return PageView(
       children: [
         EmotionRecorder(emotionLogs: emotionLogs, key: emotionRecorderKey), // First page - Emotion Recorder.
