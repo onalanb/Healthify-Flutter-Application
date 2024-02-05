@@ -29,113 +29,27 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => RecordingProvider()),
       ],
-      child: HealthifyApp(),
+      child: MaterialApp(
+        home: Scaffold(
+          body: HealthifyApp(),
+        ),
+      )
     ),
   );
 }
 
 // Applications main widget, helps set the theme and home page.
 class HealthifyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xDED04646), // Background color for app bar.
-        ),
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.deepOrange,  // Background color for the app.
-        ),
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Healthify'), // Set the title of the app bar.
-        ),
-        body: HomePage(), // Set the body of the app.
-      ),
-    );
-  }
-}
-
-// Main Home page widget containing the page view style.
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  bool isInitialDataLoaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showPersistentBottomSheet(context);
-    });
-  }
-
-  void _showPersistentBottomSheet(BuildContext context) {
-    showBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Consumer<RecordingProvider>(
-          builder: (context, recordingProvider, child) {
-            // Check if the initial data has been loaded
-            if (!isInitialDataLoaded) {
-              isInitialDataLoaded = true;
-              return Container(
-                padding: EdgeInsets.all(16),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Last Log: \nLog Time: \nDedication Level: ',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    // Add any additional content or buttons if needed
-                  ],
-                ),
-              );
-            } else {
-              // Display data after the first log
-              return Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Last Log: ${recordingProvider.lastRecordingType}\nLog Time: ${recordingProvider.formattedLastRecordingTime}\nDedication Level: ${recordingProvider.recordingPoints}',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    // Add any additional content or buttons if needed
-                  ],
-                ),
-              );
-            }
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: WidgetPageView(),
-    );
-  }
-}
-
-// Page view widget displaying different recorders.
-class WidgetPageView extends StatelessWidget {
   final Key emotionRecorderKey = UniqueKey();
   final Key dietRecorderKey = UniqueKey();
   final Key workoutRecorderKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showPersistentBottomSheet(context);
+    });
+
     var emotionBox = Hive.box<Map<dynamic, dynamic>>('EmotionBox');
     List<Map<dynamic, dynamic>> allEmotions = emotionBox.values.toList();
     print('allEmotions: $allEmotions');
@@ -158,12 +72,121 @@ class WidgetPageView extends StatelessWidget {
     List<Map<dynamic, dynamic>> workoutLogs = allWorkouts.reversed.toList();
     print('workoutLogs: $workoutLogs');
 
-    return PageView(
-      children: [
-        EmotionRecorder(emotionLogs: emotionLogs, key: emotionRecorderKey), // First page - Emotion Recorder.
-        DietRecorder(dietLogs: dietLogs, foodDropdown: foodDropdown, key: dietRecorderKey), // Second page - Diet Recorder.
-        WorkoutRecorder(workoutLogs: workoutLogs, key: workoutRecorderKey), // Third page - Workout Recorder.
-      ],
+    // This repeats for every page,
+    // so defining once here to use in routes below multiple times.
+    var healthifyAppBar = AppBar(
+      title: const Text('Healthify'),
     );
+
+    return MaterialApp(
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xDED04646), // Background color for app bar.
+        ),
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.deepOrange,  // Background color for the app.
+        ),
+      ),
+      initialRoute: '/emotion',
+      routes: {
+        '/emotion': (context) => Scaffold(
+          appBar: healthifyAppBar,
+          body: Column(
+            children: [
+              SizedBox(height: 5),
+              createNavigationButtons(context),
+              SizedBox(height: 5),
+              Expanded(
+                child: EmotionRecorder(emotionLogs: emotionLogs, key: emotionRecorderKey),
+              ),
+            ],
+          ),
+        ),
+        '/diet': (context) => Scaffold(
+          appBar: healthifyAppBar,
+          body: Column(
+            children: [
+              SizedBox(height: 5),
+              createNavigationButtons(context),
+              SizedBox(height: 5),
+              Expanded(
+                child: DietRecorder(dietLogs: dietLogs, foodDropdown: foodDropdown, key: dietRecorderKey),
+              ),
+            ],
+          ),
+        ),
+        '/workout': (context) => Scaffold(
+          appBar: healthifyAppBar,
+          body: Column(
+            children: [
+              SizedBox(height: 5),
+              createNavigationButtons(context),
+              SizedBox(height: 5),
+              Expanded(
+                child: WorkoutRecorder(workoutLogs: workoutLogs, key: workoutRecorderKey),
+              ),
+            ],
+          ),
+        ),
+      },
+    );
+  }
+
+  void _showPersistentBottomSheet(BuildContext context) {
+    showBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<RecordingProvider>(
+          builder: (context, recordingProvider, child) {
+            // Check if the initial data has been loaded
+            var sheetText = recordingProvider.lastRecordingType == '' ?
+                'Last Log: \nLog Time: \nDedication Level: ' :
+                'Last Log: ${recordingProvider.lastRecordingType}\nLog Time: ${recordingProvider.formattedLastRecordingTime}\nDedication Level: ${recordingProvider.recordingPoints}';
+
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(sheetText, style: TextStyle(fontSize: 14))
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // We create navigation buttons for every page,
+  // so defining once here to use in routes above multiple times
+  Widget createNavigationButtons(BuildContext context) {
+    Widget navigationButtons = Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/emotion');
+            },
+            child: const Text('Log Emotion'),
+          ),
+          SizedBox(width: 10), // Add spacing between the buttons
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/diet');
+            },
+            child: const Text('Log Diet'),
+          ),
+          SizedBox(width: 10), // Add spacing between the buttons
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/workout');
+            },
+            child: const Text('Log Workout'),
+          ),
+        ]
+    );
+    return navigationButtons;
   }
 }
