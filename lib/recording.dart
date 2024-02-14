@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 import 'dart:math'; // For calculating the points (dedication)
+import 'package:hive/hive.dart';
 
 // Create a class to represent the user's recording data
 class UserRecordingData {
@@ -13,11 +14,29 @@ class UserRecordingData {
 
 // Create a provider class
 class RecordingProvider extends ChangeNotifier {
-  final UserRecordingData _userRecordingData = UserRecordingData(
-    lastRecordingTime: DateTime.now(),
-    recordingPoints: 0,
-    lastRecordingType: '',
-  );
+  late UserRecordingData _userRecordingData;
+
+  RecordingProvider() {
+    // Add the diet to hive database
+    var recordingProviderBox = Hive.box<dynamic>('RecordingProviderBox');
+    var lastRecordingTime = recordingProviderBox.get('lastRecordingTime');
+    var recordingPoints = recordingProviderBox.get('recordingPoints');
+    var lastRecordingType = recordingProviderBox.get('lastRecordingType');
+
+    if (lastRecordingTime != null) {
+      _userRecordingData = UserRecordingData(
+        lastRecordingTime: lastRecordingTime as DateTime,
+        recordingPoints: recordingPoints as int,
+        lastRecordingType: lastRecordingType as String,
+      );
+    } else {
+      _userRecordingData = UserRecordingData(
+        lastRecordingTime: DateTime.now(),
+        recordingPoints: 0,
+        lastRecordingType: '',
+      );
+    }
+  }
 
   // Maximum points that can be earned
   static const int maxPoints = 100;
@@ -55,6 +74,11 @@ class RecordingProvider extends ChangeNotifier {
 
     // Return type
     _userRecordingData.lastRecordingType = recordingType;
+
+    var recordingProviderBox = Hive.box<dynamic>('RecordingProviderBox');
+    recordingProviderBox.put('lastRecordingTime', currentTime);
+    recordingProviderBox.put('recordingPoints', pointsEarned);
+    recordingProviderBox.put('lastRecordingType', recordingType);
 
     // Notify listeners to update widgets that depend on this data
     notifyListeners();

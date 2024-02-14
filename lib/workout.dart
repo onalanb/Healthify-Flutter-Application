@@ -95,7 +95,7 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 20),             // Spacing between the exercise selectio and duration input.
+          const SizedBox(height: 20),             // Spacing between the exercise selection and duration input.
           const Text(
             'Duration (minutes):',          // Label for duration input.
             style: TextStyle(fontSize: 18), // Style for the label.

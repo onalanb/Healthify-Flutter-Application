@@ -12,18 +12,18 @@ void main() {
     recordingProvider.record('Diet');
 
     // Build our app and trigger a frame.
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MultiProvider(
-              providers: [
-                ChangeNotifierProvider.value(value: recordingProvider),
-              ],
-              child: Scaffold(
-                body: DietRecorder(dietLogs: [], foodDropdown: {},),
-              ),
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: recordingProvider),
+          ],
+          child: Scaffold(
+            body: DietRecorder(dietLogs: [], foodDropdown: {},),
           ),
-        );
+        ),
+      ),
+    );
 
     // Verify that the UI elements are displayed.
     expect(find.text('What did you eat today?'), findsOneWidget);

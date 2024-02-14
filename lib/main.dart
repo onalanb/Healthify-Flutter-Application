@@ -17,23 +17,24 @@ void main() async {
   Hive.init(appDocumentDir.path);
 
   // Delete the hive boxes to start fresh
-  // await Hive.deleteBoxFromDisk('EmotionBox');
+  //await Hive.deleteBoxFromDisk('RecordingProviderBox');
 
   await Hive.openBox<Map<dynamic, dynamic>>('EmotionBox');
   await Hive.openBox<Map<dynamic, dynamic>>('DietBox');
   await Hive.openBox<Map<dynamic, dynamic>>('WorkoutBox');
   await Hive.openBox<String>('FoodDropdownBox');
+  await Hive.openBox<dynamic>('RecordingProviderBox');
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => RecordingProvider()),
-      ],
-      child: MaterialApp(
-        home: Scaffold(
-          body: HealthifyApp(),
-        ),
-      )
+        providers: [
+          ChangeNotifierProvider(create: (context) => RecordingProvider()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: HealthifyApp(),
+          ),
+        )
     ),
   );
 }
@@ -132,6 +133,7 @@ class HealthifyApp extends StatelessWidget {
     );
   }
 
+  // Builds the persistent bottom sheet.
   void _showPersistentBottomSheet(BuildContext context) {
     showBottomSheet(
       context: context,
@@ -140,8 +142,8 @@ class HealthifyApp extends StatelessWidget {
           builder: (context, recordingProvider, child) {
             // Check if the initial data has been loaded
             var sheetText = recordingProvider.lastRecordingType == '' ?
-                'Last Log: \nLog Time: \nDedication Level: ' :
-                'Last Log: ${recordingProvider.lastRecordingType}\nLog Time: ${recordingProvider.formattedLastRecordingTime}\nDedication Level: ${recordingProvider.recordingPoints}';
+            'Last Log: \nLog Time: \nDedication Level: ' :
+            'Last Log: ${recordingProvider.lastRecordingType}\nLog Time: ${recordingProvider.formattedLastRecordingTime}\nDedication Level: ${recordingProvider.recordingPoints}';
 
             return Container(
               padding: const EdgeInsets.all(16),
