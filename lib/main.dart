@@ -10,6 +10,7 @@ import 'emotion.dart';
 import 'diet.dart';
 import 'workout.dart';
 import 'recording.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,8 @@ void main() async {
           ChangeNotifierProvider(create: (context) => RecordingProvider()),
         ],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: HealthifyApp(),
           ),
@@ -80,6 +83,8 @@ class HealthifyApp extends StatelessWidget {
     );
 
     return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xDED04646), // Background color for app bar.
@@ -142,8 +147,10 @@ class HealthifyApp extends StatelessWidget {
           builder: (context, recordingProvider, child) {
             // Check if the initial data has been loaded
             var sheetText = recordingProvider.lastRecordingType == '' ?
-            'Last Log: \nLog Time: \nDedication Level: ' :
-            'Last Log: ${recordingProvider.lastRecordingType}\nLog Time: ${recordingProvider.formattedLastRecordingTime}\nDedication Level: ${recordingProvider.recordingPoints}';
+              //'Last Log: \nLog Time: \nDedication Level: ' :
+              AppLocalizations.of(context)!.persistentSheetEmptyText :
+              //'Last Log: ${recordingProvider.lastRecordingType}\nLog Time: ${recordingProvider.formattedLastRecordingTime}\nDedication Level: ${recordingProvider.recordingPoints}';
+              AppLocalizations.of(context)!.persistentSheetText(recordingProvider.lastRecordingType, recordingProvider.lastRecordingTime, recordingProvider.lastRecordingTime, recordingProvider.recordingPoints);
 
             return Container(
               padding: const EdgeInsets.all(16),
@@ -171,21 +178,24 @@ class HealthifyApp extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, '/emotion');
             },
-            child: const Text('Log Emotion'),
+            //child: const Text('Log Emotion'),
+            child: Text(AppLocalizations.of(context)!.logEmotion),
           ),
           SizedBox(width: 10), // Add spacing between the buttons
           ElevatedButton(
             onPressed: () {
               Navigator.pushNamed(context, '/diet');
             },
-            child: const Text('Log Diet'),
+            //child: const Text('Log Diet'),
+            child: Text(AppLocalizations.of(context)!.logDiet),
           ),
           SizedBox(width: 10), // Add spacing between the buttons
           ElevatedButton(
             onPressed: () {
               Navigator.pushNamed(context, '/workout');
             },
-            child: const Text('Log Workout'),
+            //child: const Text('Log Workout'),
+            child: Text(AppLocalizations.of(context)!.logWorkout),
           ),
         ]
     );

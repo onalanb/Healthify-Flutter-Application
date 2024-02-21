@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 import 'package:hive/hive.dart';
 import 'recording.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // Emotion Recorder Widget
 // Allows user to choose from one of 30 hard coded emojis to express how they currently feel.
@@ -65,8 +66,8 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
-          'What emoji expresses how you feel?', // Title asking the user to select an emoji.
+        Text(
+          AppLocalizations.of(context)!.emotionQuestion, // Title asking the user to select an emoji.
           style: TextStyle(fontSize: 18),       // Style for the title
         ),
         const SizedBox(height: 20), // Spacing between the title and emoji list.
@@ -92,8 +93,8 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
           }).toList(),
         ),
         const SizedBox(height: 20), // Spacing between emoji list and logged emotions.
-        const Text(
-          'Logged Emotions:',                                           // Title for logged emotions.
+        Text(
+          AppLocalizations.of(context)!.loggedEmotions,                 // Title for logged emotions.
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for title.
         ),
         const SizedBox(height: 10), // Spacing between title and logged emotions list.
@@ -104,7 +105,8 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
               return ListTile(
                 title: Text(emotionLogs[index]['emoji']),  // Displays the logged emoji.
                 subtitle: Text(
-                  'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(emotionLogs[index]['timestamp'])}',  // Displays the timestamp of the logged emotion.
+                  //'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(emotionLogs[index]['timestamp'])}',  // Displays the timestamp of the logged emotion.
+                  AppLocalizations.of(context)!.loggedAt(emotionLogs[index]['timestamp'], emotionLogs[index]['timestamp'])
                 ),
                 trailing: IconButton(
                   icon: Icon(Icons.delete),

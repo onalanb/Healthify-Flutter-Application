@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 import 'package:hive/hive.dart';
 import 'recording.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // Workout Recorder Widget
 // Allows the user to select a workout from 12 different options and for how long they did it.
@@ -21,15 +22,8 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
   TextEditingController durationController = TextEditingController();
   late List<Map<dynamic, dynamic>> workoutLogs;
 
-  // List of exercises the users get to pick from.
-  final List<String> exercises = [
-    'Dancing', 'Cycling', 'Running', 'Swimming',
-    'Weightlifting', 'Yoga', 'Martial Arts', 'Rowing',
-    'Climbing' , 'Jump Rope', 'Parkour', 'Stability Training'
-  ];
-
   // The default exercise when the user opens the app.
-  String selectedExercise = 'Dancing';
+  String? selectedExercise;
 
   @override
   void initState() {
@@ -46,7 +40,7 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
 
     var now = DateTime.now();
     var loggedWorkout = {
-      'exercise': selectedExercise,
+      'exercise': selectedExercise ?? AppLocalizations.of(context)!.dancing,
       'duration': duration,
       'timestamp': now,
     };
@@ -72,17 +66,24 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
   // Widget UI for recording the user's workout information.
   @override
   Widget build(BuildContext context) {
+    // List of exercises the users get to pick from.
+    List<String> exercises = [
+    AppLocalizations.of(context)!.dancing, AppLocalizations.of(context)!.cycling, AppLocalizations.of(context)!.running, AppLocalizations.of(context)!.swimming,
+      AppLocalizations.of(context)!.weightlifting, AppLocalizations.of(context)!.yoga, AppLocalizations.of(context)!.martialArts, AppLocalizations.of(context)!.rowing,
+      AppLocalizations.of(context)!.climbing, AppLocalizations.of(context)!.jumpRope, AppLocalizations.of(context)!.parkour, AppLocalizations.of(context)!.stabilityTraining
+    ];
+
     return Padding(
       padding: EdgeInsets.all(20), // Padding around the widget.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // Aligns children to the start (left side) of the column.
         children: [
-          const Text(
-            'What was your workout today?', // Title asking about the user's workout.
+          Text(
+            AppLocalizations.of(context)!.workoutQuestion, // Title asking about the user's workout.
             style: TextStyle(fontSize: 18), // Style for the title.
           ),
           DropdownButton<String>(
-            value: selectedExercise,  // Currently selected exercise.
+            value: selectedExercise ?? AppLocalizations.of(context)!.dancing,  // Currently selected exercise.
             onChanged: (String? newValue) {
               setState(() {
                 selectedExercise = newValue!; // Updates the selected exercise when changed.
@@ -96,25 +97,26 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
             }).toList(),
           ),
           const SizedBox(height: 20),             // Spacing between the exercise selection and duration input.
-          const Text(
-            'Duration (minutes):',          // Label for duration input.
+          Text(
+            AppLocalizations.of(context)!.duration, // Label for duration input.
+            //'Duration (minutes):',          // Label for duration input.
             style: TextStyle(fontSize: 18), // Style for the label.
           ),
           TextField(
             controller: durationController,     // Text field to input the workout duration.
             keyboardType: TextInputType.number, // Keyboard for duration input.
-            decoration: const InputDecoration(
-              hintText: 'Enter duration',       // Placeholder text for duration text field.
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.hintDuration,       // Placeholder text for duration text field.
             ),
           ),
           const SizedBox(height: 20),         // Spacing between duration input and log workout button.
           ElevatedButton(
             onPressed: logWorkout,      // Function to log the workout entry.
-            child: const Text('Log Workout'), // Text for the button.
+            child: Text(AppLocalizations.of(context)!.logWorkout), // Text for the button.
           ),
           const SizedBox(height: 20), // Spacing between log workout button and logged workout list.
-          const Text(
-            'Logged Workouts:', // Title for the list of logged workouts.
+          Text(
+            AppLocalizations.of(context)!.loggedWorkouts,                 // Title for the list of logged workouts.
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for the title.
           ),
           Expanded(
@@ -122,10 +124,11 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
               itemCount: workoutLogs.length,  // Total number of logged workouts.
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('${workoutLogs[index]['exercise']} (${workoutLogs[index]['duration']} mins)'), // Displays logged exercise.
+                  title: Text('${workoutLogs[index]['exercise']} ${AppLocalizations.of(context)!.loggedWorkout(workoutLogs[index]['duration'])}' ), // Displays logged exercise.
                   subtitle: Text(
                     // Displays duration and timestamp of the logged workout entry.
-                    'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
+                    //'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
+                      AppLocalizations.of(context)!.loggedAt(workoutLogs[index]['timestamp'], workoutLogs[index]['timestamp'])
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,

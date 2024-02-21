@@ -1,0 +1,77 @@
+{
+  "logEmotion": "Log Emotion",
+  "loggedEmotions": "Logged Emotions",
+  "logDiet": "Log Diet",
+  "loggedDiets": "Logged Diets",
+  "logWorkout": "Log Workout",
+  "loggedWorkouts": "Logged Workouts",
+  "persistentSheetEmptyText": "Last Log: \nLog Time: \nDedication Level: ",
+  "persistentSheetText": "Last Log: {lastRecordingType}\nLog Time: {lastRecordingDay} {lastRecordingTime}\nDedication Level: {recordingPoints}",
+  "@persistentSheetText": {
+    "description": "A message about the most recent activity for the persistent sheet",
+    "placeholders": {
+      "lastRecordingType": {
+        "type": "String",
+        "example": "Emotion"
+      },
+      "lastRecordingDay": {
+        "type": "DateTime",
+        "format": "yMd"
+      },
+      "lastRecordingTime": {
+        "type": "DateTime",
+        "format": "jm"
+      },
+      "recordingPoints": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "loggedAt": "Logged at: {loggedDay} {loggedTime}",
+  "@loggedAt": {
+    "description": "When an emotion, diet or workout was logged",
+    "placeholders": {
+      "loggedDay": {
+        "type": "DateTime",
+        "format": "yMd"
+      },
+      "loggedTime": {
+        "type": "DateTime",
+        "format": "jm"
+      }
+    }
+  },
+  "calories": "Calories",
+  "grams": "Grams",
+  "items": "Items",
+  "duration": "Duration (minutes):",
+  "hintDuration" : "Enter duration",
+  "workoutQuestion" : "What was your workout today?",
+  "quantityHint" : "Enter quantity",
+  "enterOrSelectFood" : "Enter or select food",
+  "enterFood" : "Enter food",
+  "dietQuestion" : "What did you eat today?",
+  "emotionQuestion" : "What emoji expresses how you feel?",
+  "dancing" : "Dancing",
+  "cycling" : "Cycling",
+  "running" : "Running",
+  "swimming" : "Swimming",
+  "weightlifting" : "Weightlifting",
+  "yoga" : "Yoga",
+  "martialArts" : "Martial Arts",
+  "rowing" : "Rowing",
+  "climbing" : "Climbing",
+  "jumpRope" : "Jump Rope",
+  "parkour" : "Parkour",
+  "stabilityTraining" : "Stability Training",
+  "loggedWorkout": "({loggedDuration} minutes)",
+  "@loggedWorkout": {
+    "description": "A logged workout's duration",
+    "placeholders": {
+      "loggedDuration": {
+        "type": "String"
+      }
+    }
+  }
+}

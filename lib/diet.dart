@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 import 'package:hive/hive.dart';
 import 'recording.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // Diet Recorder Widget
 // Allows user to type in what they ate and how much of it they had.
@@ -25,7 +26,7 @@ class _DietRecorderState extends State<DietRecorder> {
   late List<Map<dynamic, dynamic>> dietLogs;
   late Set<String> foodDropdown;
 
-  String selectedUnit = 'Calories'; // Default unit
+  String? selectedUnit; // Default unit
   String? selectedEntry; // Selected entry from the dropdown list
   int saveIndex = -1; // Remember index for value to be updated
 
@@ -53,7 +54,7 @@ class _DietRecorderState extends State<DietRecorder> {
     var loggedDiet = {
       'food': food.isNotEmpty ? food : selectedEntry,
       'quantity': quantity,
-      'unit': selectedUnit,
+      'unit': selectedUnit ?? AppLocalizations.of(context)!.calories,
       'timestamp': now,
     };
 
@@ -107,7 +108,7 @@ class _DietRecorderState extends State<DietRecorder> {
     var saveDiet = {
       'food': food.isNotEmpty ? food : selectedEntry,
       'quantity': quantity,
-      'unit': selectedUnit,
+      'unit': selectedUnit ?? AppLocalizations.of(context)!.calories,
       'timestamp': log['timestamp'],
     };
 
@@ -129,8 +130,8 @@ class _DietRecorderState extends State<DietRecorder> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // Aligns children to the start (left side) of the column.
         children: [
-          const Text(
-            'What did you eat today?',      // Title asking about the user's diet.
+          Text(
+            AppLocalizations.of(context)!.dietQuestion,      // Title asking about the user's diet.
             style: TextStyle(fontSize: 18), // Style for the title.
           ),
 
@@ -141,7 +142,7 @@ class _DietRecorderState extends State<DietRecorder> {
                 child: TextField(
                   controller: foodController,   // Text field for input food.
                   decoration: InputDecoration(
-                    hintText: dietLogs.isNotEmpty ? 'Enter or select food' : 'Enter food',     // Placeholder text for food input.
+                    hintText: dietLogs.isNotEmpty ? AppLocalizations.of(context)!.enterOrSelectFood : AppLocalizations.of(context)!.enterFood,     // Placeholder text for food input.
                   ),
                 ),
               ),
@@ -171,20 +172,20 @@ class _DietRecorderState extends State<DietRecorder> {
                 child: TextField(
                   controller: quantityController,     // Text field for quantity input.
                   keyboardType: TextInputType.number, // Keyboard for quantity input.
-                  decoration: const InputDecoration(
-                    hintText: 'Enter quantity',       // Placeholder text for quantity input.
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.quantityHint,       // Placeholder text for quantity input.
                   ),
                 ),
               ),
               const SizedBox(width: 10),    // Spacing between quantity input and unit selection.
               DropdownButton<String>(
-                value: selectedUnit,  // Currently selected unit. (I.E. Calories, Grams, Items)
+                value: selectedUnit ?? AppLocalizations.of(context)!.calories,  // Currently selected unit. (I.E. Calories, Grams, Items)
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedUnit = newValue!; // Updates the selected unit when changed.
                   });
                 },
-                items: ['Calories', 'Grams', 'Items'].map((String unit) {
+                items: [AppLocalizations.of(context)!.calories, AppLocalizations.of(context)!.grams, AppLocalizations.of(context)!.items].map((String unit) {
                   return DropdownMenuItem<String>(
                     value: unit,
                     child: Text(unit),  // Displays available units in the dropdown.
@@ -198,7 +199,7 @@ class _DietRecorderState extends State<DietRecorder> {
             children: [
               ElevatedButton(
                 onPressed: logDiet,       // Function to log the diet entry.
-                child: const Text('Log Diet'),
+                child: Text(AppLocalizations.of(context)!.logDiet),
               ),
               if (saveIndex >= 0) ...[
                 SizedBox(width: 20),
@@ -210,8 +211,8 @@ class _DietRecorderState extends State<DietRecorder> {
             ],
           ),
           const SizedBox(height: 20), // Spacing between log diet button and logged diet list.
-          const Text(
-            'Logged Diets:',    // Title for the list of logged diets.
+          Text(
+            AppLocalizations.of(context)!.loggedDiets,                    // Title for the list of logged diets.
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for the title.
           ),
           Expanded(
@@ -222,7 +223,8 @@ class _DietRecorderState extends State<DietRecorder> {
                   title: Text('${dietLogs[index]['food']} (${dietLogs[index]['quantity']} ${dietLogs[index]['unit']})'),  // Displays logged food.
                   subtitle: Text(
                     // Displays quantity, unit, and timestamp of the logged diet entry.
-                    'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
+                    AppLocalizations.of(context)!.loggedAt(dietLogs[index]['timestamp'], dietLogs[index]['timestamp'])
+                    //'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
                   ),
                   trailing: Row (
                     mainAxisSize: MainAxisSize.min,
