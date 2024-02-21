@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart'; // For date/time formatting
 import 'package:hive/hive.dart';
 import 'recording.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -127,8 +126,7 @@ class _WorkoutRecorderState extends State<WorkoutRecorder> {
                   title: Text('${workoutLogs[index]['exercise']} ${AppLocalizations.of(context)!.loggedWorkout(workoutLogs[index]['duration'])}' ), // Displays logged exercise.
                   subtitle: Text(
                     // Displays duration and timestamp of the logged workout entry.
-                    //'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(workoutLogs[index]['timestamp'])}',
-                      AppLocalizations.of(context)!.loggedAt(workoutLogs[index]['timestamp'], workoutLogs[index]['timestamp'])
+                    AppLocalizations.of(context)!.loggedAt(workoutLogs[index]['timestamp'], workoutLogs[index]['timestamp'])
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,

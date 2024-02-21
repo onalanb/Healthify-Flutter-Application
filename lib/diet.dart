@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart'; // For date/time formatting
 import 'package:hive/hive.dart';
 import 'recording.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -224,7 +223,6 @@ class _DietRecorderState extends State<DietRecorder> {
                   subtitle: Text(
                     // Displays quantity, unit, and timestamp of the logged diet entry.
                     AppLocalizations.of(context)!.loggedAt(dietLogs[index]['timestamp'], dietLogs[index]['timestamp'])
-                    //'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(dietLogs[index]['timestamp'])}',
                   ),
                   trailing: Row (
                     mainAxisSize: MainAxisSize.min,

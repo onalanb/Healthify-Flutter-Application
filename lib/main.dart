@@ -147,9 +147,7 @@ class HealthifyApp extends StatelessWidget {
           builder: (context, recordingProvider, child) {
             // Check if the initial data has been loaded
             var sheetText = recordingProvider.lastRecordingType == '' ?
-              //'Last Log: \nLog Time: \nDedication Level: ' :
               AppLocalizations.of(context)!.persistentSheetEmptyText :
-              //'Last Log: ${recordingProvider.lastRecordingType}\nLog Time: ${recordingProvider.formattedLastRecordingTime}\nDedication Level: ${recordingProvider.recordingPoints}';
               AppLocalizations.of(context)!.persistentSheetText(recordingProvider.lastRecordingType, recordingProvider.lastRecordingTime, recordingProvider.lastRecordingTime, recordingProvider.recordingPoints);
 
             return Container(
@@ -178,7 +176,6 @@ class HealthifyApp extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, '/emotion');
             },
-            //child: const Text('Log Emotion'),
             child: Text(AppLocalizations.of(context)!.logEmotion),
           ),
           SizedBox(width: 10), // Add spacing between the buttons
@@ -186,7 +183,6 @@ class HealthifyApp extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, '/diet');
             },
-            //child: const Text('Log Diet'),
             child: Text(AppLocalizations.of(context)!.logDiet),
           ),
           SizedBox(width: 10), // Add spacing between the buttons
@@ -194,7 +190,6 @@ class HealthifyApp extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, '/workout');
             },
-            //child: const Text('Log Workout'),
             child: Text(AppLocalizations.of(context)!.logWorkout),
           ),
         ]

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart'; // For date/time formatting
 import 'package:hive/hive.dart';
 import 'recording.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -105,7 +104,6 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
               return ListTile(
                 title: Text(emotionLogs[index]['emoji']),  // Displays the logged emoji.
                 subtitle: Text(
-                  //'Logged at: ${DateFormat('MM/dd/yyyy hh:mm a').format(emotionLogs[index]['timestamp'])}',  // Displays the timestamp of the logged emotion.
                   AppLocalizations.of(context)!.loggedAt(emotionLogs[index]['timestamp'], emotionLogs[index]['timestamp'])
                 ),
                 trailing: IconButton(
