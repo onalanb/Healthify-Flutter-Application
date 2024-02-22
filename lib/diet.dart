@@ -1,4 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/style_switching_button.dart';
+import 'package:flutter_app/style_switching_dropdown.dart';
+import 'package:flutter_app/style_switching_list_view.dart';
+import 'package:flutter_app/style_switching_text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
 import 'recording.dart';
@@ -17,6 +22,8 @@ class DietRecorder extends StatefulWidget {
   @override
   _DietRecorderState createState() => _DietRecorderState();
 }
+
+/******************************************************************************/
 
 // Stateful widget to record diet logs.
 class _DietRecorderState extends State<DietRecorder> {
@@ -121,9 +128,45 @@ class _DietRecorderState extends State<DietRecorder> {
     });
   }
 
+  void onDelete(int index) {
+    // Delete the diet from hive database
+    // Add the diet to hive database
+    var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
+    var dietKey = (dietLogs[index]['timestamp'] as DateTime).millisecondsSinceEpoch.toString();
+    dietBox.delete(dietKey);
+    print('Deleting key $dietKey');
+    print('Remaining keys ${dietBox.keys}');
+    print('Remaining values ${dietBox.values}');
+    setState(() {
+      dietLogs.removeAt(index);
+    });
+  }
+
+  String getTitle(int index) {
+    return '${dietLogs[index]['food']} (${dietLogs[index]['quantity']} ${dietLogs[index]['unit']})';
+  }
+
+  String getSubtitle(int index) {
+    return AppLocalizations.of(context)!.loggedAt(dietLogs[index]['timestamp'], dietLogs[index]['timestamp']);
+  }
+
+  void unitSelected (String? newValue) {
+    setState(() {
+      selectedUnit = newValue!; // Updates the selected unit when changed.
+    });
+  }
+
+  void foodSelected (String? newValue) {
+    setState(() {
+      selectedEntry = newValue;
+    });
+  }
+
   // Widget UI for recording the user's diet information.
   @override
   Widget build(BuildContext context) {
+    List<String> units = [AppLocalizations.of(context)!.calories, AppLocalizations.of(context)!.grams, AppLocalizations.of(context)!.items];
+
     return Padding(
       padding: const EdgeInsets.all(20),  // Padding around the widget.
       child: Column(
@@ -138,29 +181,18 @@ class _DietRecorderState extends State<DietRecorder> {
             children: [
               Expanded(
                 // Always show the text field for food input
-                child: TextField(
-                  controller: foodController,   // Text field for input food.
-                  decoration: InputDecoration(
-                    hintText: dietLogs.isNotEmpty ? AppLocalizations.of(context)!.enterOrSelectFood : AppLocalizations.of(context)!.enterFood,     // Placeholder text for food input.
-                  ),
-                ),
+                child: StyleSwitchingTextField(
+                    controller: foodController,
+                    keyboardType: TextInputType.text,
+                    getHintText: () { return dietLogs.isNotEmpty ? AppLocalizations.of(context)!.enterOrSelectFood : AppLocalizations.of(context)!.enterFood; }),
               ),
+              SizedBox(width: 10),
               // Display the dropdown list only if there are previous entries
               if (dietLogs.isNotEmpty)
-                DropdownButton<String>(
-                  value: selectedEntry,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedEntry = newValue;
-                    });
-                  },
-                  items: foodDropdown.map((entry) {
-                    return DropdownMenuItem<String>(
-                      value: entry,
-                      child: Text(entry),
-                    );
-                  }).toList(),
-                ),
+                StyleSwitchingDropDown(
+                    dropDownMenuOptionList: foodDropdown.toList(),
+                    getSelectedValue: () { return selectedEntry; },
+                    onSelect: foodSelected),
             ],
           ),
 
@@ -168,44 +200,25 @@ class _DietRecorderState extends State<DietRecorder> {
           Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: quantityController,     // Text field for quantity input.
-                  keyboardType: TextInputType.number, // Keyboard for quantity input.
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.quantityHint,       // Placeholder text for quantity input.
-                  ),
-                ),
+                child: StyleSwitchingTextField(
+                    controller: quantityController,
+                    keyboardType: TextInputType.number,
+                    getHintText: () { return AppLocalizations.of(context)!.quantityHint; }),
               ),
               const SizedBox(width: 10),    // Spacing between quantity input and unit selection.
-              DropdownButton<String>(
-                value: selectedUnit ?? AppLocalizations.of(context)!.calories,  // Currently selected unit. (I.E. Calories, Grams, Items)
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedUnit = newValue!; // Updates the selected unit when changed.
-                  });
-                },
-                items: [AppLocalizations.of(context)!.calories, AppLocalizations.of(context)!.grams, AppLocalizations.of(context)!.items].map((String unit) {
-                  return DropdownMenuItem<String>(
-                    value: unit,
-                    child: Text(unit),  // Displays available units in the dropdown.
-                  );
-                }).toList(),
-              ),
+              StyleSwitchingDropDown(
+                  dropDownMenuOptionList: units,
+                  getSelectedValue: () { return selectedUnit ?? AppLocalizations.of(context)!.calories; },
+                  onSelect: unitSelected),
             ],
           ),
           const SizedBox(height: 20),       // Spacing between unit selection and log diet button.
           Row(
             children: [
-              ElevatedButton(
-                onPressed: logDiet,       // Function to log the diet entry.
-                child: Text(AppLocalizations.of(context)!.logDiet),
-              ),
+              StyleSwitchingButton(interaction: logDiet, getButtonText: () { return AppLocalizations.of(context)!.logDiet; }),
               if (saveIndex >= 0) ...[
                 SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: updateDietLog,
-                  child: Text('Update'),
-                ),
+                StyleSwitchingButton(interaction: updateDietLog, getButtonText: () { return AppLocalizations.of(context)!.update; }),
               ],
             ],
           ),
@@ -215,45 +228,7 @@ class _DietRecorderState extends State<DietRecorder> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),  // Style for the title.
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: dietLogs.length, // Total number of logged diets.
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('${dietLogs[index]['food']} (${dietLogs[index]['quantity']} ${dietLogs[index]['unit']})'),  // Displays logged food.
-                  subtitle: Text(
-                    // Displays quantity, unit, and timestamp of the logged diet entry.
-                    AppLocalizations.of(context)!.loggedAt(dietLogs[index]['timestamp'], dietLogs[index]['timestamp'])
-                  ),
-                  trailing: Row (
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton (
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          updateDiet(index);
-                        },
-                      ),
-                      IconButton (
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          // Delete the diet from hive database
-                          // Add the diet to hive database
-                          var dietBox = Hive.box<Map<dynamic, dynamic>>('DietBox');
-                          var dietKey = (dietLogs[index]['timestamp'] as DateTime).millisecondsSinceEpoch.toString();
-                          dietBox.delete(dietKey);
-                          print('Deleting key $dietKey');
-                          print('Remaining keys ${dietBox.keys}');
-                          print('Remaining values ${dietBox.values}');
-                          setState(() {
-                            dietLogs.removeAt(index);
-                          });
-                        }
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+            child: StyleSwitchingListView(logSize: dietLogs.length ,getTitle: getTitle, getSubtitle: getSubtitle, onDelete: onDelete, onUpdate: updateDiet),
           ),
         ],
       ),

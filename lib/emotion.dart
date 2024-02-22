@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/cupertino.dart';
 import 'recording.dart';
+import 'style_options.dart';
+import 'style_switching_list_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // Emotion Recorder Widget
@@ -15,6 +18,8 @@ class EmotionRecorder extends StatefulWidget {
   @override
   _EmotionRecorderState createState() => _EmotionRecorderState();
 }
+
+/******************************************************************************/
 
 // Stateful widget to record the emotions with emojis.
 class _EmotionRecorderState extends State<EmotionRecorder> {
@@ -59,9 +64,35 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
     });
   }
 
+  void onDelete(int index) {
+    // Delete the emotion from hive database
+    // Add the emotion to hive database
+    var emotionBox = Hive.box<Map<dynamic, dynamic>>('EmotionBox');
+    var emotionKey = (emotionLogs[index]['timestamp'] as DateTime).millisecondsSinceEpoch.toString();
+    emotionBox.delete(emotionKey);
+    print('Deleting key $emotionKey');
+    print('Remaining keys ${emotionBox.keys}');
+    print('Remaining values ${emotionBox.values}');
+
+    // Delete the emotion from the local list:
+    setState(() {
+      emotionLogs.removeAt(index);
+    });
+  }
+
+  String getTitle(int index) {
+    return emotionLogs[index]['emoji'];
+  }
+
+  String getSubtitle(int index) {
+    return AppLocalizations.of(context)!.loggedAt(emotionLogs[index]['timestamp'], emotionLogs[index]['timestamp']);
+  }
+
   // Widget UI for recording the user's emotions.
   @override
   Widget build(BuildContext context) {
+    final styleOption = context.watch<StyleOptions>();
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -98,35 +129,7 @@ class _EmotionRecorderState extends State<EmotionRecorder> {
         ),
         const SizedBox(height: 10), // Spacing between title and logged emotions list.
         Expanded(
-          child: ListView.builder(
-            itemCount: emotionLogs.length, // Total number of logged emotions.
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(emotionLogs[index]['emoji']),  // Displays the logged emoji.
-                subtitle: Text(
-                  AppLocalizations.of(context)!.loggedAt(emotionLogs[index]['timestamp'], emotionLogs[index]['timestamp'])
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    // Delete the emotion from hive database
-                    // Add the emotion to hive database
-                    var emotionBox = Hive.box<Map<dynamic, dynamic>>('EmotionBox');
-                    var emotionKey = (emotionLogs[index]['timestamp'] as DateTime).millisecondsSinceEpoch.toString();
-                    emotionBox.delete(emotionKey);
-                    print('Deleting key $emotionKey');
-                    print('Remaining keys ${emotionBox.keys}');
-                    print('Remaining values ${emotionBox.values}');
-
-                    // Delete the emotion from the local list:
-                    setState(() {
-                      emotionLogs.removeAt(index);
-                    });
-                  },
-                ),
-              );
-            },
-          ),
+          child: StyleSwitchingListView(logSize: emotionLogs.length ,getTitle: getTitle, getSubtitle: getSubtitle, onDelete: onDelete, onUpdate: null),
         ),
       ],
     );

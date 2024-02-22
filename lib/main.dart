@@ -2,6 +2,7 @@
 // January 6th, 2024
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/style_switching_button.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,6 +11,7 @@ import 'emotion.dart';
 import 'diet.dart';
 import 'workout.dart';
 import 'recording.dart';
+import 'style_options.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
@@ -30,6 +32,9 @@ void main() async {
     MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => RecordingProvider()),
+          Provider<StyleOptions>(
+            create: (_) => StyleOptions(WidgetStyle.cupertino),
+          ),
         ],
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -41,6 +46,8 @@ void main() async {
     ),
   );
 }
+
+/******************************************************************************/
 
 // Applications main widget, helps set the theme and home page.
 class HealthifyApp extends StatelessWidget {
@@ -172,26 +179,18 @@ class HealthifyApp extends StatelessWidget {
     Widget navigationButtons = Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/emotion');
-            },
-            child: Text(AppLocalizations.of(context)!.logEmotion),
-          ),
+          StyleSwitchingButton(
+              interaction: () { Navigator.pushNamed(context, '/emotion'); },
+              getButtonText: () { return AppLocalizations.of(context)!.logEmotion; }),
           SizedBox(width: 10), // Add spacing between the buttons
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/diet');
-            },
-            child: Text(AppLocalizations.of(context)!.logDiet),
-          ),
+          StyleSwitchingButton(
+              interaction: () { Navigator.pushNamed(context, '/diet'); },
+              getButtonText: () { return AppLocalizations.of(context)!.logDiet; }),
           SizedBox(width: 10), // Add spacing between the buttons
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/workout');
-            },
-            child: Text(AppLocalizations.of(context)!.logWorkout),
-          ),
+          StyleSwitchingButton(
+              interaction: () { Navigator.pushNamed(context, '/workout'); },
+              getButtonText: () { return AppLocalizations.of(context)!.logWorkout; }),
+
         ]
     );
     return navigationButtons;

@@ -31,5 +31,6 @@
   "jumpRope" : "Saltar la cuerda",
   "parkour" : "Parkour",
   "stabilityTraining": "Entrenamiento de estabilidad",
-  "loggedWorkout": "({loggedDuration} minutos)"
+  "loggedWorkout": "({loggedDuration} minutos)",
+  "update" : "Actualizar"
 }

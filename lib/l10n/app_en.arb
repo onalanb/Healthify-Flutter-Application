@@ -65,6 +65,7 @@
   "jumpRope" : "Jump Rope",
   "parkour" : "Parkour",
   "stabilityTraining" : "Stability Training",
+  "update" : "Update",
   "loggedWorkout": "({loggedDuration} minutes)",
   "@loggedWorkout": {
     "description": "A logged workout's duration",
