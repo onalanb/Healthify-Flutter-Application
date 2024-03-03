@@ -58,8 +58,8 @@ class Login extends StatelessWidget {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
     // For easier testing.
-    // emailController.text = 'baran.onalan@gmail.com';
-    // passwordController.text = 'password';
+    emailController.text = 'baran.onalan@gmail.com';
+    passwordController.text = 'password';
 
     return MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

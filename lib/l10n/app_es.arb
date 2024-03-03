@@ -1,9 +1,11 @@
 {
-  "logEmotion": "Reg Emoción",
+  "emotion": "Emoción",
   "loggedEmotions": "Emociones Registradas",
   "logDiet": "Reg Dieta",
+  "diet": "Dieta",
   "loggedDiets": "Diarios Registrados",
   "logWorkout": "Reg Entreno",
+  "workout": "Entreno",
   "loggedWorkouts": "Entrenamientos registrados",
   "persistentSheetEmptyText": "Último Registro: \nHora del Registro: \nNivel de Dedicación: ",
   "persistentSheetText": "Último Registro: {lastRecordingType}\nHora del Registro: {lastRecordingDay} {lastRecordingTime}\nNivel de Dedicación: {recordingPoints}",

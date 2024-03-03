@@ -6,6 +6,7 @@ import 'emotion.dart';
 import 'diet.dart';
 import 'workout.dart';
 import 'recording.dart';
+import 'leaderboard.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -63,7 +64,7 @@ class HealthifyApp extends StatelessWidget {
           primarySwatch: Colors.deepOrange,  // Background color for the app.
         ),
       ),
-      initialRoute: '/emotion',
+      initialRoute: '/leaderboard',
       routes: {
         '/emotion': (context) => Scaffold(
           appBar: healthifyAppBar,
@@ -100,6 +101,19 @@ class HealthifyApp extends StatelessWidget {
               SizedBox(height: 5),
               Expanded(
                 child: WorkoutRecorder(workoutLogs: workoutLogs, key: workoutRecorderKey),
+              ),
+            ],
+          ),
+        ),
+        '/leaderboard': (context) => Scaffold(
+          appBar: healthifyAppBar,
+          body: Column(
+            children: [
+              SizedBox(height: 5),
+              createNavigationButtons(context),
+              SizedBox(height: 5),
+              Expanded(
+                child: Leaderboard(),
               ),
             ],
           ),
@@ -144,20 +158,29 @@ class HealthifyApp extends StatelessWidget {
         children: [
           SizedBox(width: 5),
           Expanded(
-              child: StyleSwitchingButton(
-                  interaction: () { Navigator.pushNamed(context, '/emotion'); },
-                  getButtonText: () { return AppLocalizations.of(context)!.logEmotion; })),
+            child: StyleSwitchingButton(
+              interaction: () { Navigator.pushNamed(context, '/emotion'); },
+              getButtonText: () { return AppLocalizations.of(context)!.emotion; })),
           SizedBox(width: 5), // Add spacing between the buttons
           Expanded(
-              child: StyleSwitchingButton(
-                  interaction: () { Navigator.pushNamed(context, '/diet'); },
-                  getButtonText: () { return AppLocalizations.of(context)!.logDiet; })),
+            child: StyleSwitchingButton(
+              interaction: () { Navigator.pushNamed(context, '/diet'); },
+              getButtonText: () { return AppLocalizations.of(context)!.diet; })),
           SizedBox(width: 5), // Add spacing between the buttons
           Expanded(
-              child: StyleSwitchingButton(
-                  interaction: () { Navigator.pushNamed(context, '/workout'); },
-                  getButtonText: () { return AppLocalizations.of(context)!.logWorkout; })),
-          SizedBox(width: 5),
+            child: StyleSwitchingButton(
+              interaction: () { Navigator.pushNamed(context, '/workout'); },
+              getButtonText: () { return AppLocalizations.of(context)!.workout; })),
+          Container(
+            width: 40, // Adjust the width as needed
+            height: 40, // Adjust the height as needed
+            child: IconButton(
+              icon: Icon(Icons.leaderboard, size: 24), // Adjust the size of the icon
+              onPressed: () {
+                Navigator.pushNamed(context, '/leaderboard');
+              },
+            ),
+          ),
         ]
     );
     return navigationButtons;

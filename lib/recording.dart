@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 import 'dart:math'; // For calculating the points (dedication)
@@ -39,7 +41,7 @@ class RecordingProvider extends ChangeNotifier {
   }
 
   // Maximum points that can be earned
-  static const int maxPoints = 100;
+  static const int maxPoints = 480; // Max points is 480 after 8 hours.
 
   // Getter for last recording time
   DateTime get lastRecordingTime => _userRecordingData.lastRecordingTime;
@@ -61,7 +63,7 @@ class RecordingProvider extends ChangeNotifier {
     Duration timeDifference = currentTime.difference(_userRecordingData.lastRecordingTime);
 
     // Calculate points based on the time difference (adjust the formula as needed)
-    int pointsEarned = min(timeDifference.inHours, 24) * 5; // Linear formula, 5 points per hour up to 24 hours
+    int pointsEarned = min(timeDifference.inMinutes, 24 * 60); // One point per minute up to 8 hours (maximum 480)
 
     // Cap points earned to the maximum
     pointsEarned = min(pointsEarned, maxPoints);
@@ -77,10 +79,28 @@ class RecordingProvider extends ChangeNotifier {
 
     var recordingProviderBox = Hive.box<dynamic>('RecordingProviderBox');
     recordingProviderBox.put('lastRecordingTime', currentTime);
-    recordingProviderBox.put('recordingPoints', pointsEarned);
+    recordingProviderBox.put('recordingPoints', _userRecordingData.recordingPoints);
     recordingProviderBox.put('lastRecordingType', recordingType);
+
+    if (pointsEarned != 0) { addUserData(_userRecordingData.recordingPoints); }
 
     // Notify listeners to update widgets that depend on this data
     notifyListeners();
   }
+
+  void addUserData(int points) {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    User? userCredential = FirebaseAuth.instance.currentUser;
+    String uid = userCredential!.uid;
+
+    // Create a new UserRank
+    final user = <String, dynamic>{
+      "email": userCredential.email ?? "anonymous",
+      "points": points,
+      "uid": uid,
+    };
+    DocumentReference userDocRef = db.collection("leaderboard").doc(uid);
+    userDocRef.set(user);
+  }
+
 }

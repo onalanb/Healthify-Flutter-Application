@@ -104,11 +104,11 @@ class Signup extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text("Don't have an account?", style: TextStyle(fontSize: 14)),
+                const Text("Already have an account?", style: TextStyle(fontSize: 14)),
                 TextButton(
                   onPressed: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Signup())),
-                  child: Text("SignUp", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo[400])),
+                      MaterialPageRoute(builder: (context) => Login())),
+                  child: Text("Login", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo[400])),
                 ),
               ],
             ),
