@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "975131849609",
+    "project_id": "healthify-flutter-application",
+    "storage_bucket": "healthify-flutter-application.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:975131849609:android:c683de47ee3c0646f42758",
+        "android_client_info": {
+          "package_name": "com.example.flutter_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAwfMcCKOFw2VT6ZY_D2RX7tLU04RmOxo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
