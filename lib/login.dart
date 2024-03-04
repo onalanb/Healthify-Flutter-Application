@@ -1,14 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/recording.dart';
 import 'package:flutter_app/signup.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'healhify_app.dart';
 
 class Login extends StatelessWidget {
 
   const Login({Key? key}) : super(key: key);
 
-  Future<bool> loginWithEmailPassword(String email, String password) async {
+  Future<bool> loginWithEmailPassword(String email, String password, context) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
@@ -16,6 +18,11 @@ class Login extends StatelessWidget {
       );
       User? user = userCredential.user;
       print('User signed in: ${user?.uid}');
+
+      // Get an instance of RecordingProvider
+      final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
+      recordingProvider.refreshFromHive(); // for the persistent modal
+
       return true;
     } catch (e) {
       print('Error signing in: $e');
@@ -24,12 +31,16 @@ class Login extends StatelessWidget {
   }
 
   // Sign in anonymously
-  Future<void> loginAnonymously() async {
+  Future<void> loginAnonymously(context) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInAnonymously();
       // Access the signed-in user via userCredential.user
       User? user = userCredential.user;
       print('Anonymous user signed in: ${user?.uid}');
+
+      // Get an instance of RecordingProvider
+      final recordingProvider = Provider.of<RecordingProvider>(context, listen: false);
+      recordingProvider.refreshFromHive(); // for the persistent modal
     } catch (e) {
       print('Error signing in anonymously: $e');
     }
@@ -42,6 +53,24 @@ class Login extends StatelessWidget {
         return AlertDialog(
           title: const Text('Login Failed'),
           content: const Text('Please make sure you are signed up, check your email/password, and try again.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showEmptyUsernamePasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Empty input'),
+          content: const Text('Please enter your email/password, and try again.'),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),
@@ -101,18 +130,22 @@ class Login extends StatelessWidget {
               onPressed: () async {
                 String email = emailController.text;
                 String password = passwordController.text;
-                bool successfulLogin = await loginWithEmailPassword(email, password);
-                if (successfulLogin) {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MaterialApp(
-                              localizationsDelegates: AppLocalizations.localizationsDelegates,
-                              supportedLocales: AppLocalizations.supportedLocales,
-                              home: Scaffold(
-                                body: HealthifyApp(),
-                              ),
-                            )));
+                if (email.isEmpty || password.isEmpty) {
+                  showEmptyUsernamePasswordDialog(context);
                 } else {
-                  showLoginFailedDialog(context);
+                  bool successfulLogin = await loginWithEmailPassword(email, password, context);
+                  if (successfulLogin) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => MaterialApp(
+                          localizationsDelegates: AppLocalizations.localizationsDelegates,
+                          supportedLocales: AppLocalizations.supportedLocales,
+                          home: Scaffold(
+                            body: HealthifyApp(),
+                          ),
+                        )));
+                  } else {
+                    showLoginFailedDialog(context);
+                  }
                 }
               },
               child: const Text("Login", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
@@ -134,7 +167,7 @@ class Login extends StatelessWidget {
                 const Text("Or you can launch app as", style: TextStyle(fontSize: 14)),
                 TextButton(
                   onPressed: () async {
-                    await loginAnonymously();
+                    await loginAnonymously(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => MaterialApp(
                       localizationsDelegates: AppLocalizations.localizationsDelegates,
                       supportedLocales: AppLocalizations.supportedLocales,

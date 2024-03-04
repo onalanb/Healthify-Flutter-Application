@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date/time formatting
 import 'dart:math'; // For calculating the points (dedication)
@@ -17,13 +17,16 @@ class UserRecordingData {
 // Create a provider class
 class RecordingProvider extends ChangeNotifier {
   late UserRecordingData _userRecordingData;
+  late String uid; // uid of the logged in user
 
   RecordingProvider() {
-    // Add the diet to hive database
+    User? user = FirebaseAuth.instance.currentUser;
+    uid = user!.uid;
+    print('----------------- UID: ${uid} -----------------');
     var recordingProviderBox = Hive.box<dynamic>('RecordingProviderBox');
-    var lastRecordingTime = recordingProviderBox.get('lastRecordingTime');
-    var recordingPoints = recordingProviderBox.get('recordingPoints');
-    var lastRecordingType = recordingProviderBox.get('lastRecordingType');
+    var lastRecordingTime = recordingProviderBox.get('${uid}_lastRecordingTime');
+    var recordingPoints = recordingProviderBox.get('${uid}_recordingPoints');
+    var lastRecordingType = recordingProviderBox.get('${uid}_lastRecordingType');
 
     if (lastRecordingTime != null) {
       _userRecordingData = UserRecordingData(
@@ -40,11 +43,39 @@ class RecordingProvider extends ChangeNotifier {
     }
   }
 
+  // This is to refresh the recording provider when a new user logs in (via escape)
+  void refreshFromHive() {
+    User? user = FirebaseAuth.instance.currentUser;
+    uid = user!.uid;
+    print('----------------- UID: ${uid} -----------------');
+    var recordingProviderBox = Hive.box<dynamic>('RecordingProviderBox');
+    var lastRecordingTime = recordingProviderBox.get('${uid}_lastRecordingTime');
+    var recordingPoints = recordingProviderBox.get('${uid}_recordingPoints');
+    var lastRecordingType = recordingProviderBox.get('${uid}_lastRecordingType');
+    if (lastRecordingTime != null) {
+      _userRecordingData.lastRecordingTime = lastRecordingTime;
+      _userRecordingData.recordingPoints = recordingPoints;
+      _userRecordingData.lastRecordingType = lastRecordingType;
+    }  else {
+      _userRecordingData.lastRecordingTime = DateTime.now();
+      _userRecordingData.recordingPoints = 0;
+      _userRecordingData.lastRecordingType = '';
+    }
+    // Notify listeners to update widgets that depend on this data
+    notifyListeners();
+  }
+
   // Maximum points that can be earned
   static const int maxPoints = 480; // Max points is 480 after 8 hours.
 
   // Getter for last recording time
   DateTime get lastRecordingTime => _userRecordingData.lastRecordingTime;
+
+  String get lastRecordingTimeWithUTCOffset {
+    Duration offset = lastRecordingTime.timeZoneOffset;
+    DateTime utcTime = lastRecordingTime.subtract(offset);
+    return DateFormat('dd/MM/yyyy hh:mm a').format(utcTime);
+  }
 
   // Format the date and time
   String get formattedLastRecordingTime {
@@ -58,8 +89,9 @@ class RecordingProvider extends ChangeNotifier {
   String get lastRecordingType => _userRecordingData.lastRecordingType;
 
   // Method to update recording data
-  void record(String recordingType) {
+  void record(String recordingType) async {
     DateTime currentTime = DateTime.now();
+    // This calculation is for our local hive DB only
     Duration timeDifference = currentTime.difference(_userRecordingData.lastRecordingTime);
 
     // Calculate points based on the time difference (adjust the formula as needed)
@@ -68,39 +100,43 @@ class RecordingProvider extends ChangeNotifier {
     // Cap points earned to the maximum
     pointsEarned = min(pointsEarned, maxPoints);
 
-    // Update last recording time
-    _userRecordingData.lastRecordingTime = currentTime;
+    // I need to do this before updating _userRecordingData.lastRecordingTime
+    int points = await calculateAndRecordPointsUsingCloudFunction();
 
-    // Give the user some points (you can adjust the points as needed)
-    _userRecordingData.recordingPoints += pointsEarned;
+    if (points >= 0) {
+      // Update last recording time
+      _userRecordingData.lastRecordingTime = currentTime;
 
-    // Return type
-    _userRecordingData.lastRecordingType = recordingType;
+      // Give the user some points (this is also be stored locally in hive)
+      _userRecordingData.recordingPoints = points;
 
-    var recordingProviderBox = Hive.box<dynamic>('RecordingProviderBox');
-    recordingProviderBox.put('lastRecordingTime', currentTime);
-    recordingProviderBox.put('recordingPoints', _userRecordingData.recordingPoints);
-    recordingProviderBox.put('lastRecordingType', recordingType);
+      // Return type
+      _userRecordingData.lastRecordingType = recordingType;
 
-    if (pointsEarned != 0) { addUserData(_userRecordingData.recordingPoints); }
+      var recordingProviderBox = Hive.box<dynamic>('RecordingProviderBox');
+      recordingProviderBox.put('${uid}_lastRecordingTime', currentTime);
+      recordingProviderBox.put('${uid}_recordingPoints', _userRecordingData.recordingPoints);
+      recordingProviderBox.put('${uid}_lastRecordingType', recordingType);
 
-    // Notify listeners to update widgets that depend on this data
-    notifyListeners();
+      // Notify listeners to update widgets that depend on this data
+      notifyListeners();
+    }
   }
 
-  void addUserData(int points) {
-    FirebaseFirestore db = FirebaseFirestore.instance;
-    User? userCredential = FirebaseAuth.instance.currentUser;
-    String uid = userCredential!.uid;
+  // This is where I call the cloud function record_points that runs the business
+  // logic to calculate points and store it in firestore DB
+  Future<int> calculateAndRecordPointsUsingCloudFunction() async {
+    try {
+      final HttpsCallable recordPoints = FirebaseFunctions.instance.httpsCallable('record_points');
+      final resp = await recordPoints.call({
+        'lastTime' : lastRecordingTimeWithUTCOffset,
+      });
 
-    // Create a new UserRank
-    final user = <String, dynamic>{
-      "email": userCredential.email ?? "anonymous",
-      "points": points,
-      "uid": uid,
-    };
-    DocumentReference userDocRef = db.collection("leaderboard").doc(uid);
-    userDocRef.set(user);
+      return resp.data['points'].toInt();
+    } catch (e) {
+      print('Error calculating recording points: $e');
+    }
+
+    return -1;
   }
-
 }
